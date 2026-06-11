@@ -503,6 +503,19 @@ export default function App() {
   const bInfo = useMemo(() => bmi ? getBMIInfo(bmi) : null, [bmi]);
   const userAgeGroup = useMemo(() => getUserAgeGroup(age), [age]);
 
+  // ── Check payment return status on load ───────────────────────────────
+  const [paymentReturn, setPaymentReturn] = useState(null);
+  useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+    const email = params.get("email");
+    const type = params.get("type");
+    if (status) {
+      setPaymentReturn({ status, email, type });
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   const toggleCat = l => setOpenCats(p => ({ ...p, [l]: !p[l] }));
   const toggleSym = s => setSelSyms(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]);
   const updSym = (s, f, v) => setSymDetails(p => ({ ...p, [s]: { ...(p[s]||{}), [f]:v } }));
@@ -2151,14 +2164,37 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
 
         {/* Pay button */}
         <button
-          onClick={() => {
+          onClick={async () => {
             if (!payGate.email || !payGate.email.includes("@")) {
               alert("Please enter a valid email address.");
               return;
             }
-            // TODO: integrate Mollie payment here
-            // For now show confirmation
-            alert(`Mollie payment integration coming soon.\n\nIn production:\n→ Mollie checkout opens for ${price}\n→ On success: Claude generates full report\n→ PDF sent to ${payGate.email}`);
+            updatePayGate({ previewLoading: true });
+            try {
+              const res = await fetch("/.netlify/functions/create-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: payGate.email,
+                  amount: payGate.tab === 0 ? "4.90" : "9.90",
+                  reportType: payGate.tab === 0 ? "lab" : "consultation",
+                  description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
+                  reportData: payGate.tab === 0
+                    ? { labFile: labTab.fileB64 ? "uploaded" : "none", fileName: labTab.fileName }
+                    : { age, sex, height, weight, symptoms: selSyms, medications: meds, allergies, timeline }
+                })
+              });
+              const data = await res.json();
+              if (data.checkoutUrl) {
+                window.location.href = data.checkoutUrl;
+              } else {
+                alert("Payment setup failed. Please try again.");
+                updatePayGate({ previewLoading: false });
+              }
+            } catch(e) {
+              alert("Payment setup failed. Please try again.");
+              updatePayGate({ previewLoading: false });
+            }
           }}
           disabled={payGate.previewLoading}
           style={{
@@ -2167,7 +2203,7 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
             color:"#fff", fontWeight:800, fontSize:16, cursor: payGate.previewLoading ? "not-allowed" : "pointer",
             boxShadow:"0 4px 14px rgba(22,163,74,0.3)", marginBottom:12
           }}>
-          🔓 Pay {price} and get my full report
+          {payGate.previewLoading ? "Setting up payment..." : `🔓 Pay ${payGate.tab === 0 ? "€4.90" : "€9.90"} and get my full report`}
         </button>
 
         {/* Payment methods */}
@@ -2401,6 +2437,46 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
 
       <div style={{ padding:"24px 16px" }}>
       <div style={{ maxWidth:680, margin:"0 auto" }}>
+
+        {/* Payment return status */}
+        {paymentReturn && (
+          <div style={{
+            borderRadius:14, padding:"20px 24px", marginBottom:20, textAlign:"center",
+            background: paymentReturn.status === "paid" ? "#f0fdf4" : "#fff1f2",
+            border: `2px solid ${paymentReturn.status === "paid" ? "#16a34a" : "#fca5a5"}`
+          }}>
+            {paymentReturn.status === "paid" ? (
+              <>
+                <div style={{ fontSize:36, marginBottom:8 }}>✅</div>
+                <div style={{ fontSize:18, fontWeight:800, color:"#16a34a", marginBottom:8 }}>Payment confirmed!</div>
+                <div style={{ fontSize:14, color:"#166534", marginBottom:4 }}>
+                  Your full report is being generated and will be sent to:
+                </div>
+                <div style={{ fontSize:15, fontWeight:700, color:"#16a34a", marginBottom:12 }}>
+                  {paymentReturn.email}
+                </div>
+                <div style={{ fontSize:13, color:"#166534" }}>
+                  Check your inbox in the next few minutes. Don't forget to check your spam folder.
+                </div>
+              </>
+            ) : paymentReturn.status === "pending" ? (
+              <>
+                <div style={{ fontSize:36, marginBottom:8 }}>⏳</div>
+                <div style={{ fontSize:16, fontWeight:700, color:"#ca8a04" }}>Payment processing...</div>
+                <div style={{ fontSize:13, color:"#92400e", marginTop:8 }}>Your report will be sent to {paymentReturn.email} once confirmed.</div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize:36, marginBottom:8 }}>❌</div>
+                <div style={{ fontSize:16, fontWeight:700, color:"#dc2626" }}>Payment {paymentReturn.status}</div>
+                <div style={{ fontSize:13, color:"#991b1b", marginTop:8 }}>No charge was made. Please try again.</div>
+                <button onClick={() => setPaymentReturn(null)} style={{ marginTop:12, padding:"8px 20px", borderRadius:8, border:"none", background:"#dc2626", color:"#fff", fontWeight:600, cursor:"pointer" }}>
+                  Try again
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         <div style={{ textAlign:"center", marginBottom:20 }}>
           <div style={{ fontSize:12, fontWeight:700, letterSpacing:"0.1em", color:"#0ea5e9", textTransform:"uppercase", marginBottom:4 }}>HealthDecoded</div>
