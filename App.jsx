@@ -5,6 +5,187 @@ const SECTIONS = ["Profile","Symptoms","Vitals","Blood Tests","Medications","Tim
 const TABS = ["🔬 Lab Results","🩺 Consultation","💊 Supplements"];
 const BRAND = { name:"HealthDecoded", tagline:"Your health, finally explained.", url:"healthdecoded.com" };
 
+// ── Multilanguage framework ───────────────────────────────────────────────
+const TRANSLATIONS = {
+  EN: {
+    // Nav
+    labResults: "Lab Results",
+    consultation: "Consultation",
+    supplements: "Supplements",
+    // Header
+    tagline: "Your health, finally explained.",
+    subtitle: "AI-powered health analysis — education, not diagnosis",
+    // Tab descriptions
+    tab1Pitch: "Got your blood test back? Don't just file it away.",
+    tab1Desc: "We read every single marker — what it means, what's optimal (not just \"normal\"), what you should eat, which OTC supplement to take, and exactly when to retest. The detailed analysis your doctor didn't have time to give you. Ready in 60 seconds.",
+    tab1Tag: "Most popular",
+    tab1Includes: ["Every biomarker explained in full","Optimal vs reference range — the real difference","Specific OTC & diet actions per finding","7-day meal plan targeted to your deficiencies","Retest roadmap — when and what to recheck","PDF report to keep and share"],
+    tab2Pitch: "Something feels wrong but nobody's connecting the dots.",
+    tab2Desc: "Tell us your symptoms, medications, allergies, and health history. Upload your blood tests if you have them. We cross-reference everything — patterns that would take 3 appointments to uncover — and give you a complete action plan with urgency scoring, OTC guidance checked against your allergies and drugs, and the exact questions to bring to your next appointment.",
+    tab2Tag: "Most complete",
+    tab2Includes: ["Urgency score 1–5 — know when to act NOW","OTC guidance with allergy & drug interaction check","Symptoms + blood tests + timeline — all cross-referenced","Specific action cards: medicine, diet, lifestyle, doctor","Questions pre-written for your pharmacist and doctor","Personalised supplement recommendations"],
+    tab3Pitch: "Before you waste money on the wrong supplements.",
+    tab3Desc: "Most people take what they see advertised. We show you what actually matters for your age, your sex, and your specific health goal — with the clinical evidence behind each one, the correct dose, and where to get it. No upselling. No brand deals. Just what works.",
+    tab3Tag: "Always free",
+    tab3Includes: ["Personalised by age group and sex","Filtered by goal: diet, weight loss, diabetes, stress","Clinical evidence behind every recommendation","Exact doses — not vague ranges","Direct links to buy at the right price","Always free — no payment required"],
+    startFor: "Start for",
+    browseGuide: "Browse the guide below →",
+    // Hero
+    heroTitle1: "You got your blood tests done.",
+    heroTitle2: "Now find out what they really mean.",
+    heroSub1: "Your doctor had 8 minutes. They checked the flagged values, said",
+    heroSub2: "and moved on.",
+    heroSub3: "We have time. We go deeper. Because this is your life.",
+    heroHeart: "Your health is not a checkbox. It deserves a real explanation.",
+    heroHeartText: "Every number in your blood test is a signal from your body. Some signals are quiet warnings that arrive years before a real problem. Others confirm you're on the right track. None of them should go unexplained — because",
+    heroHeartBold: "the earlier you understand what's happening inside, the more you can do about it.",
+    hero247Title: "Available 24 hours a day, 7 days a week",
+    hero247Text: "Got your results at 11pm on a Sunday? Worried and can't sleep? We're here. No appointment. No waiting room. No €50 consultation fee. Instant analysis, any time, anywhere in the world.",
+    heroReceive: "What you receive with every report:",
+    heroNuanceTitle: "What your doctor knows but doesn't have time to explain",
+    heroNuance: "A TSH of 3.5 is \"within range\" — but optimal thyroid function sits between 1.0 and 2.0. A ferritin of 18 is \"not anaemic\" — but fatigue, hair loss, and poor concentration typically start below 30. Your LDL is \"normal\" — but LDL particle size matters more than the number. Your Vitamin D is \"fine\" — but immune strength, mood, and bone protection require levels above 75 nmol/L, not just above 30.",
+    heroNuanceBold: "These nuances are the difference between feeling okay and feeling well. We explain every one.",
+    disclaimer: "Educational analysis only · Not a medical diagnosis · Always discuss results with your healthcare professional",
+    // Upload
+    uploadTitle: "Lab Results Interpreter",
+    uploadSubtitle: "Upload your blood test report — every biomarker explained in plain language with full context.",
+    uploadPDF: "Upload PDF",
+    uploadPDFSub: "From your lab or doctor",
+    takePhoto: "Take a Photo",
+    takePhotoSub: "Photo of your paper results",
+    dropHere: "Drop file here or click to browse",
+    dropSub: "PDF, JPG, or PNG · Any lab worldwide",
+    privacyNote: "Privacy: Your file goes directly to Claude AI for analysis. It is not stored on any server.",
+    analyseBtn: "Analyse My Blood Test Report",
+    uploadDifferent: "Upload a different file",
+    readyToAnalyse: "Ready to analyse — Claude will extract all biomarker values",
+    // Calendar
+    calendarTitle: "What blood tests should you get — and when?",
+    calendarSub: "Select your age group and sex for a personalised testing calendar.",
+    ageGroup: "Age group",
+    sex: "Sex",
+    male: "Male",
+    female: "Female",
+    franceNote: "In France: Most of these tests can be requested directly at any laboratory without a GP referral. A full panel typically costs €30–80. Results are usually ready within 24–48 hours.",
+    haveResults: "I have my results — upload now →",
+    // Payment gate
+    reportReady: "Your report is ready to generate",
+    reportReadySub: "We have everything we need. Here's a preview of what we found.",
+    previewTitle: "Preview — What we found",
+    previewLocked: "Full report unlocked after payment",
+    weWillAnalyse: "We'll analyse:",
+    yourReportIncludes: "Your report includes:",
+    whereToSend: "Where should we send your report?",
+    emailPlaceholder: "your@email.com",
+    emailNote: "Your full report PDF will be sent here immediately after payment.",
+    payBtn: "Pay",
+    andGetReport: "and get my full report",
+    securePayment: "Secure payment via Mollie",
+    goBack: "← Go back and edit my data",
+    // Payment return
+    paymentConfirmed: "Payment confirmed!",
+    reportSentTo: "Your full report is being generated and will be sent to:",
+    checkInbox: "Check your inbox in the next few minutes. Don't forget to check your spam folder.",
+    paymentProcessing: "Payment processing...",
+    reportPending: "Your report will be sent once confirmed.",
+    paymentFailed: "Payment",
+    noCharge: "No charge was made. Please try again.",
+    tryAgain: "Try again",
+    // Footer
+    footerNote: "AI-generated educational content only · Not a medical device · Always consult a qualified healthcare professional",
+  },
+  FR: {
+    // Nav
+    labResults: "Bilan Sanguin",
+    consultation: "Consultation",
+    supplements: "Compléments",
+    // Header
+    tagline: "Votre santé, enfin expliquée.",
+    subtitle: "Analyse de santé par IA — éducation, pas diagnostic",
+    // Tab descriptions
+    tab1Pitch: "Vous avez vos résultats d'analyses ? Ne les rangez pas dans un tiroir.",
+    tab1Desc: "Nous lisons chaque marqueur — ce qu'il signifie, ce qui est optimal (pas juste \"normal\"), ce que vous devriez manger, quel complément prendre, et exactement quand refaire vos analyses. L'analyse détaillée que votre médecin n'a pas eu le temps de vous donner. Prêt en 60 secondes.",
+    tab1Tag: "Le plus populaire",
+    tab1Includes: ["Chaque biomarqueur expliqué en détail","Valeur optimale vs valeur de référence — la vraie différence","Actions OTC et diète spécifiques par résultat","Plan alimentaire 7 jours ciblé sur vos carences","Calendrier de retest — quand et quoi refaire","Rapport PDF à conserver et partager"],
+    tab2Pitch: "Quelque chose ne va pas mais personne ne fait le lien.",
+    tab2Desc: "Dites-nous vos symptômes, médicaments, allergies et antécédents. Importez vos analyses si vous en avez. Nous croisons tout — des patterns qui nécessiteraient 3 consultations — et vous donnons un plan d'action complet avec score d'urgence, conseils OTC vérifiés contre vos allergies et traitements, et les questions exactes à poser à votre prochain rendez-vous.",
+    tab2Tag: "Le plus complet",
+    tab2Includes: ["Score d'urgence 1–5 — savoir quand agir MAINTENANT","Conseils OTC avec vérification allergies et interactions","Symptômes + analyses + timeline — tout croisé","Fiches d'action : médicament, alimentation, style de vie, médecin","Questions pré-rédigées pour votre pharmacien et médecin","Recommandations de compléments personnalisées"],
+    tab3Pitch: "Avant de dépenser de l'argent sur les mauvais compléments.",
+    tab3Desc: "La plupart des gens prennent ce qu'ils voient en publicité. Nous vous montrons ce qui compte vraiment pour votre âge, votre sexe et votre objectif de santé — avec les preuves cliniques, la dose correcte, et où l'acheter. Pas de vente forcée. Pas de partenariats. Juste ce qui fonctionne.",
+    tab3Tag: "Toujours gratuit",
+    tab3Includes: ["Personnalisé par tranche d'âge et sexe","Filtré par objectif : régime, perte de poids, diabète, stress","Preuves cliniques derrière chaque recommandation","Doses exactes — pas de fourchettes vagues","Liens directs pour acheter au bon prix","Toujours gratuit — aucun paiement requis"],
+    startFor: "Commencer pour",
+    browseGuide: "Parcourir le guide ci-dessous →",
+    // Hero
+    heroTitle1: "Vous avez fait votre bilan sanguin.",
+    heroTitle2: "Découvrez ce qu'il signifie vraiment.",
+    heroSub1: "Votre médecin avait 8 minutes. Il a vérifié les valeurs signalées, dit",
+    heroSub2: "et est passé à la suite.",
+    heroSub3: "Nous avons le temps. Nous allons plus loin. Parce que c'est votre vie.",
+    heroHeart: "Votre santé n'est pas une case à cocher. Elle mérite une vraie explication.",
+    heroHeartText: "Chaque chiffre de votre bilan est un signal de votre corps. Certains signaux sont des avertissements silencieux qui arrivent des années avant un vrai problème. D'autres confirment que vous êtes sur la bonne voie. Aucun ne devrait rester inexpliqué — parce que",
+    heroHeartBold: "plus tôt vous comprenez ce qui se passe en vous, plus vous pouvez agir.",
+    hero247Title: "Disponible 24h/24, 7j/7",
+    hero247Text: "Vos résultats sont arrivés à 23h un dimanche ? Inquiet et vous ne dormez pas ? Nous sommes là. Pas de rendez-vous. Pas de salle d'attente. Pas de consultation à 50€. Analyse instantanée, à tout moment, partout dans le monde.",
+    heroReceive: "Ce que vous recevez avec chaque rapport :",
+    heroNuanceTitle: "Ce que votre médecin sait mais n'a pas le temps d'expliquer",
+    heroNuance: "Une TSH à 3,5 est \"dans la norme\" — mais une thyroïde optimale fonctionne entre 1,0 et 2,0. Une ferritine à 18 n'est \"pas anémique\" — mais la fatigue, la chute de cheveux et les troubles de concentration commencent généralement en dessous de 30. Votre LDL est \"normal\" — mais la taille des particules LDL compte plus que le chiffre. Votre Vitamine D est \"correcte\" — mais l'immunité, l'humeur et la protection osseuse nécessitent un taux supérieur à 75 nmol/L.",
+    heroNuanceBold: "Ces nuances font la différence entre se sentir passable et se sentir bien. Nous les expliquons toutes.",
+    disclaimer: "Analyse éducative uniquement · Pas un diagnostic médical · Consultez toujours un professionnel de santé",
+    // Upload
+    uploadTitle: "Interpréteur de Bilan Sanguin",
+    uploadSubtitle: "Importez votre bilan — chaque marqueur expliqué en langage clair avec son contexte complet.",
+    uploadPDF: "Importer un PDF",
+    uploadPDFSub: "Depuis votre laboratoire ou médecin",
+    takePhoto: "Prendre une photo",
+    takePhotoSub: "Photo de vos résultats papier",
+    dropHere: "Déposez le fichier ici ou cliquez pour parcourir",
+    dropSub: "PDF, JPG ou PNG · Tout laboratoire mondial",
+    privacyNote: "Confidentialité : Votre fichier est envoyé directement à Claude IA pour analyse. Il n'est stocké sur aucun serveur.",
+    analyseBtn: "Analyser mon bilan sanguin",
+    uploadDifferent: "Importer un autre fichier",
+    readyToAnalyse: "Prêt à analyser — Claude extraira toutes les valeurs",
+    // Calendar
+    calendarTitle: "Quels bilans faire — et quand ?",
+    calendarSub: "Sélectionnez votre tranche d'âge et votre sexe pour un calendrier personnalisé.",
+    ageGroup: "Tranche d'âge",
+    sex: "Sexe",
+    male: "Homme",
+    female: "Femme",
+    franceNote: "En France : La plupart de ces analyses peuvent être prescrites directement en laboratoire sans ordonnance. Un bilan complet coûte généralement 30–80€. Les résultats sont disponibles sous 24–48h.",
+    haveResults: "J'ai mes résultats — importer maintenant →",
+    // Payment gate
+    reportReady: "Votre rapport est prêt à être généré",
+    reportReadySub: "Nous avons tout ce qu'il nous faut. Voici un aperçu de ce que nous avons trouvé.",
+    previewTitle: "Aperçu — Ce que nous avons trouvé",
+    previewLocked: "Rapport complet débloqué après paiement",
+    weWillAnalyse: "Nous analyserons :",
+    yourReportIncludes: "Votre rapport comprend :",
+    whereToSend: "Où envoyer votre rapport ?",
+    emailPlaceholder: "votre@email.com",
+    emailNote: "Votre rapport PDF complet sera envoyé ici immédiatement après le paiement.",
+    payBtn: "Payer",
+    andGetReport: "et recevoir mon rapport complet",
+    securePayment: "Paiement sécurisé via Mollie",
+    goBack: "← Revenir et modifier mes données",
+    // Payment return
+    paymentConfirmed: "Paiement confirmé !",
+    reportSentTo: "Votre rapport complet est en cours de génération et sera envoyé à :",
+    checkInbox: "Vérifiez votre boîte de réception dans quelques minutes. N'oubliez pas de vérifier vos spams.",
+    paymentProcessing: "Paiement en cours...",
+    reportPending: "Votre rapport sera envoyé une fois confirmé.",
+    paymentFailed: "Paiement",
+    noCharge: "Aucun prélèvement effectué. Veuillez réessayer.",
+    tryAgain: "Réessayer",
+    // Footer
+    footerNote: "Contenu éducatif généré par IA uniquement · Pas un dispositif médical · Consultez toujours un professionnel de santé qualifié",
+  }
+};
+
+// Helper — get translation
+const t = (lang, key) => TRANSLATIONS[lang]?.[key] ?? TRANSLATIONS.EN[key] ?? key;
+
 const SYMPTOM_CATEGORIES = [
   { label:"🧠 Neurological & Mental", color:"#7c3aed", bg:"#f5f3ff",
     symptoms:["Headaches","Dizziness","Vertigo","Memory loss / Brain fog","Vision problems","Tingling / Numbness","Anxiety","Low mood / Depression","Difficulty concentrating"] },
@@ -439,6 +620,9 @@ export default function App() {
   const [report, setReport]     = useState(null);
   const [error, setError]       = useState(null);
   const [mainTab, setMainTab]   = useState(0);
+  const [lang, setLang]         = useState(() => localStorage.getItem("hd_lang") || "EN");
+  const toggleLang = () => setLang(l => { const n = l==="EN"?"FR":"EN"; localStorage.setItem("hd_lang",n); return n; });
+  const tx = key => t(lang, key);
   const [ageFilter, setAgeFilter] = useState("All");
   const [goalFilters, setGoalFilters] = useState({ "18–30":"all", "30–50":"all", "50–65":"all", "65+":"all" });
 
@@ -1187,7 +1371,8 @@ Return ONLY valid JSON. No markdown.`;
 
   const generateLabReport = async () => {
     updateLabTab({ loading:true, error:null });
-    const prompt = `You are an expert clinical lab results interpreter and nutritionist. Analyse the attached blood test report and return a detailed, plain-language interpretation with a 7-day meal plan.
+    const langInstruction = lang === "FR" ? "Respond entirely in French." : "Respond entirely in English.";
+    const prompt = `You are an expert clinical lab results interpreter and nutritionist. ${langInstruction} Analyse the attached blood test report and return a detailed, plain-language interpretation with a 7-day meal plan.
 
 For EACH biomarker found in the report, provide a full analysis paragraph. Be specific, direct, and educational. Explain what the biomarker measures, what the patient's value means, whether it is optimal/normal/borderline/concerning, and what health implications this value has.
 
@@ -1767,43 +1952,38 @@ Return ONLY valid JSON. No markdown.`;
             <span style={{ color:"#7dd3fc" }}>Now find out what they really mean.</span>
           </h2>
           <p style={{ fontSize:14, color:"#94a3b8", lineHeight:1.7, marginBottom:16 }}>
-            Your doctor had 8 minutes. They checked the flagged values, said <em style={{ color:"#e2e8f0" }}>"everything looks fine"</em>, and moved on.<br/>
-            <strong style={{ color:"#fff" }}>We have time. We go deeper. Because this is your life.</strong>
+            {tx("heroSub1")} <em style={{ color:"#e2e8f0" }}>"everything looks fine"</em>, {tx("heroSub2")}<br/>
+            <strong style={{ color:"#fff" }}>{tx("heroSub3")}</strong>
           </p>
 
-          {/* Emotional statement */}
           <div style={{ background:"rgba(239,68,68,0.12)", border:"1px solid rgba(239,68,68,0.3)", borderRadius:10, padding:"14px 16px", marginBottom:16 }}>
             <div style={{ fontSize:14, color:"#fca5a5", fontWeight:700, marginBottom:6 }}>
-              ❤️ Your health is not a checkbox. It deserves a real explanation.
+              ❤️ {tx("heroHeart")}
             </div>
             <div style={{ fontSize:13, color:"#94a3b8", lineHeight:1.7 }}>
-              Every number in your blood test is a signal from your body. Some signals are quiet warnings that arrive years before a real problem. Others confirm you're on the right track. None of them should go unexplained — because <strong style={{ color:"#e2e8f0" }}>the earlier you understand what's happening inside, the more you can do about it.</strong>
+              {tx("heroHeartText")} <strong style={{ color:"#e2e8f0" }}>{tx("heroHeartBold")}</strong>
             </div>
           </div>
 
-          {/* 24/7 availability */}
           <div style={{ background:"rgba(125,211,252,0.08)", border:"1px solid rgba(125,211,252,0.2)", borderRadius:10, padding:"12px 16px", marginBottom:20, display:"flex", alignItems:"center", gap:12 }}>
             <span style={{ fontSize:28, flexShrink:0 }}>🕐</span>
             <div>
-              <div style={{ fontSize:13, fontWeight:700, color:"#7dd3fc", marginBottom:3 }}>Available 24 hours a day, 7 days a week</div>
-              <div style={{ fontSize:12, color:"#64748b", lineHeight:1.6 }}>
-                Got your results at 11pm on a Sunday? Worried and can't sleep? We're here. No appointment. No waiting room. No €50 consultation fee. Instant analysis, any time, anywhere in the world.
-              </div>
+              <div style={{ fontSize:13, fontWeight:700, color:"#7dd3fc", marginBottom:3 }}>{tx("hero247Title")}</div>
+              <div style={{ fontSize:12, color:"#64748b", lineHeight:1.6 }}>{tx("hero247Text")}</div>
             </div>
           </div>
 
-          {/* What you get */}
           <div style={{ fontSize:12, fontWeight:700, color:"#7dd3fc", textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10 }}>
-            What you receive with every report:
+            {tx("heroReceive")}
           </div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:20 }}>
             {[
-              ["🔍","Every marker explained in detail","Full analysis per biomarker — not just high/low. What it means for your health specifically."],
-              ["🎯","Optimal vs just 'normal'","Lab reference ranges flag disease. We tell you what optimal looks like — there's a big difference."],
-              ["💊","Exactly what to do","Diet changes, OTC supplements, lifestyle priorities — specific and actionable, not vague advice."],
-              ["❓","Questions for your doctor","Pre-written, specific talking points based on your actual values. Go in prepared, not confused."],
-              ["🥗","7-day targeted meal plan","Built around your specific deficiencies. With the reason behind every meal choice."],
-              ["🔁","Your retest roadmap","Exactly when to retest and which markers to prioritise — so you can track real progress."],
+              ["🔍", lang==="FR"?"Chaque marqueur expliqué":"Every marker explained in detail", lang==="FR"?"Analyse complète par biomarqueur — pas juste haut/bas.":"Full analysis per biomarker — not just high/low."],
+              ["🎯", lang==="FR"?"Optimal vs 'normal'":"Optimal vs just 'normal'", lang==="FR"?"Les normes de référence détectent la maladie. Nous vous disons ce qu'est l'optimal.":"Lab reference ranges flag disease. We tell you what optimal looks like."],
+              ["💊", lang==="FR"?"Quoi faire exactement":"Exactly what to do", lang==="FR"?"Changements alimentaires, compléments OTC, priorités de style de vie.":"Diet changes, OTC supplements, lifestyle priorities — specific and actionable."],
+              ["❓", lang==="FR"?"Questions pour votre médecin":"Questions for your doctor", lang==="FR"?"Points de discussion pré-rédigés basés sur vos valeurs réelles.":"Pre-written, specific talking points based on your actual values."],
+              ["🥗", lang==="FR"?"Plan alimentaire 7 jours":"7-day targeted meal plan", lang==="FR"?"Construit autour de vos carences spécifiques.":"Built around your specific deficiencies."],
+              ["🔁", lang==="FR"?"Votre calendrier de retest":"Your retest roadmap", lang==="FR"?"Exactement quand retester et quels marqueurs prioriser.":"Exactly when to retest and which markers to prioritise."],
             ].map(([icon,title,desc]) => (
               <div key={title} style={{ background:"rgba(255,255,255,0.07)", borderRadius:10, padding:"12px 14px" }}>
                 <div style={{ fontSize:20, marginBottom:6 }}>{icon}</div>
@@ -1813,22 +1993,17 @@ Return ONLY valid JSON. No markdown.`;
             ))}
           </div>
 
-          {/* The real differentiator */}
           <div style={{ background:"rgba(125,211,252,0.1)", border:"1px solid rgba(125,211,252,0.3)", borderRadius:10, padding:"14px 16px", marginBottom:16 }}>
             <div style={{ fontSize:13, color:"#7dd3fc", fontWeight:700, marginBottom:6 }}>
-              What your doctor knows but doesn't have time to explain
+              {tx("heroNuanceTitle")}
             </div>
             <div style={{ fontSize:12, color:"#94a3b8", lineHeight:1.8 }}>
-              A TSH of 3.5 is <em>"within range"</em> — but optimal thyroid function sits between 1.0 and 2.0. &nbsp;
-              A ferritin of 18 is <em>"not anaemic"</em> — but fatigue, hair loss, and poor concentration typically start below 30. &nbsp;
-              Your LDL is <em>"normal"</em> — but LDL particle size matters more than the number. &nbsp;
-              Your Vitamin D is <em>"fine"</em> — but immune strength, mood, and bone protection require levels above 75 nmol/L, not just above 30. &nbsp;
-              <strong style={{ color:"#e2e8f0" }}>These nuances are the difference between feeling okay and feeling well. We explain every one.</strong>
+              {tx("heroNuance")} <strong style={{ color:"#e2e8f0" }}>{tx("heroNuanceBold")}</strong>
             </div>
           </div>
 
           <div style={{ fontSize:11, color:"#475569", textAlign:"center" }}>
-            Educational analysis only · Not a medical diagnosis · Always discuss results with your healthcare professional
+            {tx("disclaimer")}
           </div>
         </div>
 
@@ -1838,15 +2013,15 @@ Return ONLY valid JSON. No markdown.`;
               padding:"24px 16px", borderRadius:14, border:"2px solid #bae6fd",
               background:"#f0f9ff", cursor:"pointer", textAlign:"center" }}>
               <div style={{ fontSize:32, marginBottom:8 }}>📋</div>
-              <div style={{ fontWeight:700, fontSize:14, color:"#0369a1", marginBottom:4 }}>Upload PDF</div>
-              <div style={{ fontSize:12, color:"#64748b" }}>From your lab or doctor</div>
+              <div style={{ fontWeight:700, fontSize:14, color:"#0369a1", marginBottom:4 }}>{tx("uploadPDF")}</div>
+              <div style={{ fontSize:12, color:"#64748b" }}>{tx("uploadPDFSub")}</div>
             </button>
             <button onClick={() => updateLabTab({ inputMode:"upload" })} style={{
               padding:"24px 16px", borderRadius:14, border:"2px solid #e9d5ff",
               background:"#faf5ff", cursor:"pointer", textAlign:"center" }}>
               <div style={{ fontSize:32, marginBottom:8 }}>📸</div>
-              <div style={{ fontWeight:700, fontSize:14, color:"#7c3aed", marginBottom:4 }}>Take a Photo</div>
-              <div style={{ fontSize:12, color:"#64748b" }}>Photo of your paper results</div>
+              <div style={{ fontWeight:700, fontSize:14, color:"#7c3aed", marginBottom:4 }}>{tx("takePhoto")}</div>
+              <div style={{ fontSize:12, color:"#64748b" }}>{tx("takePhotoSub")}</div>
             </button>
           </div>
         )}
@@ -1892,23 +2067,21 @@ Return ONLY valid JSON. No markdown.`;
         )}
 
         <div style={{ padding:"10px 14px", background:"#fffbeb", border:"1px solid #fde68a", borderRadius:10, fontSize:12, color:"#92400e", marginBottom:24 }}>
-          <strong>Privacy:</strong> Your file goes directly to Claude AI for analysis. It is not stored on any server.
+          <strong>{lang==="FR"?"Confidentialité":"Privacy"}:</strong> {tx("privacyNote")}
         </div>
 
         {/* ── Blood Test Calendar ── */}
         <div style={{ borderTop:"2px solid #e2e8f0", paddingTop:24 }}>
           <div style={{ textAlign:"center", marginBottom:20 }}>
             <div style={{ fontSize:18, fontWeight:800, color:"#0f172a", marginBottom:6 }}>
-              📅 What blood tests should you get — and when?
+              📅 {tx("calendarTitle")}
             </div>
-            <p style={{ fontSize:13, color:"#64748b" }}>
-              Select your age group and sex for a personalised testing calendar.
-            </p>
+            <p style={{ fontSize:13, color:"#64748b" }}>{tx("calendarSub")}</p>
           </div>
 
           {/* Age group selector */}
           <div style={{ marginBottom:14 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:"#374151", marginBottom:8, textTransform:"uppercase", letterSpacing:"0.06em" }}>Age group</div>
+            <div style={{ fontSize:12, fontWeight:700, color:"#374151", marginBottom:8, textTransform:"uppercase", letterSpacing:"0.06em" }}>{tx("ageGroup")}</div>
             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
               {Object.entries(TEST_CALENDAR).map(([ag, meta]) => {
                 const active = calAgeGroup === ag;
@@ -1927,9 +2100,9 @@ Return ONLY valid JSON. No markdown.`;
 
           {/* Sex selector */}
           <div style={{ marginBottom:20 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:"#374151", marginBottom:8, textTransform:"uppercase", letterSpacing:"0.06em" }}>Sex</div>
+            <div style={{ fontSize:12, fontWeight:700, color:"#374151", marginBottom:8, textTransform:"uppercase", letterSpacing:"0.06em" }}>{tx("sex")}</div>
             <div style={{ display:"flex", gap:8 }}>
-              {[["Male","♂ Male","#1d4ed8","#eff6ff","#bfdbfe"],["Female","♀ Female","#be185d","#fdf2f8","#f9a8d4"]].map(([val,lbl,col,bg,bdr]) => {
+              {[["Male", `♂ ${tx("male")}`, "#1d4ed8","#eff6ff","#bfdbfe"],["Female", `♀ ${tx("female")}`, "#be185d","#fdf2f8","#f9a8d4"]].map(([val,lbl,col,bg,bdr]) => {
                 const active = calSex === val;
                 return (
                   <button key={val} onClick={() => updateLabTab({ calSex: val })} style={{
@@ -1990,15 +2163,13 @@ Return ONLY valid JSON. No markdown.`;
                   </div>
                   <div style={{ marginTop:16, padding:"12px 14px", background:meta.bg,
                     borderRadius:10, fontSize:12, color:meta.color, lineHeight:1.6 }}>
-                    💡 <strong>In France:</strong> Most of these tests can be requested directly at any laboratory without a GP referral.
-                    A full panel typically costs €30–80. Results are usually ready within 24–48 hours.
-                    Upload your results here for an instant detailed interpretation.
+                    💡 {tx("franceNote")}
                   </div>
                   <div style={{ marginTop:12, textAlign:"center" }}>
                     <button onClick={() => updateLabTab({ inputMode:"upload" })} style={{
                       padding:"10px 24px", borderRadius:8, border:"none",
                       background:meta.color, color:"#fff", fontWeight:700, fontSize:13, cursor:"pointer" }}>
-                      📋 I have my results — upload now →
+                      📋 {tx("haveResults")}
                     </button>
                   </div>
                 </div>
@@ -2411,27 +2582,35 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
             Health<span style={{ color:"#0ea5e9" }}>Decoded</span>
           </div>
           {[
-            { icon:"🔬", label:"Lab Results",  price:"€4.90", color:"#0369a1", bg:"#e0f2fe" },
-            { icon:"🩺", label:"Consultation", price:"€9.90", color:"#7c3aed", bg:"#f3e8ff" },
-            { icon:"💊", label:"Supplements",  price:"Free",  color:"#16a34a", bg:"#dcfce7" },
-          ].map((t, i) => {
+            { icon:"🔬", label:tx("labResults"),  price:"€4.90", color:"#0369a1", bg:"#e0f2fe" },
+            { icon:"🩺", label:tx("consultation"), price:"€9.90", color:"#7c3aed", bg:"#f3e8ff" },
+            { icon:"💊", label:tx("supplements"),  price:lang==="FR"?"Gratuit":"Free", color:"#16a34a", bg:"#dcfce7" },
+          ].map((tab, i) => {
             const active = mainTab === i;
             return (
               <button key={i} onClick={() => setMainTab(i)} style={{
                 flex:1, display:"flex", alignItems:"center", justifyContent:"center",
                 gap:6, padding:"8px 10px", borderRadius:10, cursor:"pointer",
-                border: active ? `2px solid ${t.color}` : "2px solid #e2e8f0",
-                background: active ? t.bg : "#fff",
+                border: active ? `2px solid ${tab.color}` : "2px solid #e2e8f0",
+                background: active ? tab.bg : "#fff",
                 transition:"all 0.15s", fontFamily:"inherit"
               }}>
-                <span style={{ fontSize:16 }}>{t.icon}</span>
+                <span style={{ fontSize:16 }}>{tab.icon}</span>
                 <div style={{ textAlign:"left" }}>
-                  <div style={{ fontSize:12, fontWeight:700, color: active ? t.color : "#374151", lineHeight:1.2 }}>{t.label}</div>
-                  <div style={{ fontSize:10, fontWeight:600, color: active ? t.color : "#94a3b8" }}>{t.price}</div>
+                  <div style={{ fontSize:12, fontWeight:700, color: active ? tab.color : "#374151", lineHeight:1.2 }}>{tab.label}</div>
+                  <div style={{ fontSize:10, fontWeight:600, color: active ? tab.color : "#94a3b8" }}>{tab.price}</div>
                 </div>
               </button>
             );
           })}
+          <button onClick={toggleLang} style={{
+            padding:"6px 12px", borderRadius:20, border:"1.5px solid #e2e8f0",
+            background:"#fff", cursor:"pointer", fontFamily:"inherit",
+            fontSize:12, fontWeight:700, color:"#374151",
+            display:"flex", alignItems:"center", gap:4, flexShrink:0
+          }}>
+            {lang === "EN" ? "🇫🇷 FR" : "🇬🇧 EN"}
+          </button>
         </div>
       </div>
 
@@ -2448,30 +2627,24 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
             {paymentReturn.status === "paid" ? (
               <>
                 <div style={{ fontSize:36, marginBottom:8 }}>✅</div>
-                <div style={{ fontSize:18, fontWeight:800, color:"#16a34a", marginBottom:8 }}>Payment confirmed!</div>
-                <div style={{ fontSize:14, color:"#166534", marginBottom:4 }}>
-                  Your full report is being generated and will be sent to:
-                </div>
-                <div style={{ fontSize:15, fontWeight:700, color:"#16a34a", marginBottom:12 }}>
-                  {paymentReturn.email}
-                </div>
-                <div style={{ fontSize:13, color:"#166534" }}>
-                  Check your inbox in the next few minutes. Don't forget to check your spam folder.
-                </div>
+                <div style={{ fontSize:18, fontWeight:800, color:"#16a34a", marginBottom:8 }}>{tx("paymentConfirmed")}</div>
+                <div style={{ fontSize:14, color:"#166534", marginBottom:4 }}>{tx("reportSentTo")}</div>
+                <div style={{ fontSize:15, fontWeight:700, color:"#16a34a", marginBottom:12 }}>{paymentReturn.email}</div>
+                <div style={{ fontSize:13, color:"#166534" }}>{tx("checkInbox")}</div>
               </>
             ) : paymentReturn.status === "pending" ? (
               <>
                 <div style={{ fontSize:36, marginBottom:8 }}>⏳</div>
-                <div style={{ fontSize:16, fontWeight:700, color:"#ca8a04" }}>Payment processing...</div>
-                <div style={{ fontSize:13, color:"#92400e", marginTop:8 }}>Your report will be sent to {paymentReturn.email} once confirmed.</div>
+                <div style={{ fontSize:16, fontWeight:700, color:"#ca8a04" }}>{tx("paymentProcessing")}</div>
+                <div style={{ fontSize:13, color:"#92400e", marginTop:8 }}>{tx("reportPending")}</div>
               </>
             ) : (
               <>
                 <div style={{ fontSize:36, marginBottom:8 }}>❌</div>
-                <div style={{ fontSize:16, fontWeight:700, color:"#dc2626" }}>Payment {paymentReturn.status}</div>
-                <div style={{ fontSize:13, color:"#991b1b", marginTop:8 }}>No charge was made. Please try again.</div>
+                <div style={{ fontSize:16, fontWeight:700, color:"#dc2626" }}>{tx("paymentFailed")} {paymentReturn.status}</div>
+                <div style={{ fontSize:13, color:"#991b1b", marginTop:8 }}>{tx("noCharge")}</div>
                 <button onClick={() => setPaymentReturn(null)} style={{ marginTop:12, padding:"8px 20px", borderRadius:8, border:"none", background:"#dc2626", color:"#fff", fontWeight:600, cursor:"pointer" }}>
-                  Try again
+                  {tx("tryAgain")}
                 </button>
               </>
             )}
@@ -2480,8 +2653,8 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
 
         <div style={{ textAlign:"center", marginBottom:20 }}>
           <div style={{ fontSize:12, fontWeight:700, letterSpacing:"0.1em", color:"#0ea5e9", textTransform:"uppercase", marginBottom:4 }}>HealthDecoded</div>
-          <h1 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:4 }}>Your health, finally explained.</h1>
-          <p style={{ fontSize:14, color:"#64748b", margin:0 }}>AI-powered health analysis — education, not diagnosis</p>
+          <h1 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:4 }}>{tx("tagline")}</h1>
+          <p style={{ fontSize:14, color:"#64748b", margin:0 }}>{tx("subtitle")}</p>
         </div>
 
         {/* Tab switcher with full service descriptions */}
@@ -2489,45 +2662,45 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
           {[
             {
               icon:"🔬",
-              label:"Lab Results",
+              label:tx("labResults"),
               price:"€4.90",
               priceColor:"#0369a1",
               priceBg:"#e0f2fe",
-              pitch:"Got your blood test back? Don't just file it away.",
-              desc:"We read every single marker — what it means, what's optimal (not just \"normal\"), what you should eat, which OTC supplement to take, and exactly when to retest. The detailed analysis your doctor didn't have time to give you. Ready in 60 seconds.",
-              includes:["Every biomarker explained in full","Optimal vs reference range — the real difference","Specific OTC & diet actions per finding","7-day meal plan targeted to your deficiencies","Retest roadmap — when and what to recheck","PDF report to keep and share"],
+              pitch:tx("tab1Pitch"),
+              desc:tx("tab1Desc"),
+              includes:tx("tab1Includes"),
               color:"#0369a1",
               activeBg:"#f0f9ff",
               activeBorder:"#0369a1",
-              tag:"Most popular"
+              tag:tx("tab1Tag")
             },
             {
               icon:"🩺",
-              label:"Full Health Consultation",
+              label:lang==="FR"?"Consultation complète":"Full Health Consultation",
               price:"€9.90",
               priceColor:"#7c3aed",
               priceBg:"#f3e8ff",
-              pitch:"Something feels wrong but nobody's connecting the dots.",
-              desc:"Tell us your symptoms, medications, allergies, and health history. Upload your blood tests if you have them. We cross-reference everything — patterns that would take 3 appointments to uncover — and give you a complete action plan with urgency scoring, OTC guidance checked against your allergies and drugs, and the exact questions to bring to your next appointment.",
-              includes:["Urgency score 1–5 — know when to act NOW","OTC guidance with allergy & drug interaction check","Symptoms + blood tests + timeline — all cross-referenced","Specific action cards: medicine, diet, lifestyle, doctor","Questions pre-written for your pharmacist and doctor","Personalised supplement recommendations"],
+              pitch:tx("tab2Pitch"),
+              desc:tx("tab2Desc"),
+              includes:tx("tab2Includes"),
               color:"#7c3aed",
               activeBg:"#faf5ff",
               activeBorder:"#7c3aed",
-              tag:"Most complete"
+              tag:tx("tab2Tag")
             },
             {
               icon:"💊",
-              label:"Supplement Guide",
-              price:"Free",
+              label:lang==="FR"?"Guide compléments":"Supplement Guide",
+              price:lang==="FR"?"Gratuit":"Free",
               priceColor:"#16a34a",
               priceBg:"#dcfce7",
-              pitch:"Before you waste money on the wrong supplements.",
-              desc:"Most people take what they see advertised. We show you what actually matters for your age, your sex, and your specific health goal — with the clinical evidence behind each one, the correct dose, and where to get it. No upselling. No brand deals. Just what works.",
-              includes:["Personalised by age group and sex","Filtered by goal: diet, weight loss, diabetes, stress","Clinical evidence behind every recommendation","Exact doses — not vague ranges","Direct links to buy at the right price","Always free — no payment required"],
+              pitch:tx("tab3Pitch"),
+              desc:tx("tab3Desc"),
+              includes:tx("tab3Includes"),
               color:"#16a34a",
               activeBg:"#f0fdf4",
               activeBorder:"#16a34a",
-              tag:"Always free"
+              tag:tx("tab3Tag")
             }
           ].map((tab, i) => {
             const active = mainTab === i;
@@ -2539,7 +2712,6 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
                 boxShadow: active ? `0 4px 16px ${tab.color}18` : "none",
                 transition:"all 0.2s", overflow:"hidden"
               }}>
-                {/* Tab header */}
                 <div style={{ padding:"14px 18px", display:"flex", alignItems:"center", justifyContent:"space-between",
                   borderBottom: active ? `1px solid ${tab.color}22` : "1px solid #f1f5f9" }}>
                   <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -2555,13 +2727,11 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
                     <div style={{ fontSize:10, fontWeight:700, color:tab.color, opacity:0.8 }}>{tab.tag}</div>
                   </div>
                 </div>
-
-                {/* Expanded content — only when active */}
                 {active && (
                   <div style={{ padding:"14px 18px" }}>
                     <p style={{ fontSize:13, color:"#374151", lineHeight:1.7, marginBottom:14 }}>{tab.desc}</p>
                     <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", color:tab.color, marginBottom:8 }}>
-                      What's included:
+                      {lang==="FR"?"Ce qui est inclus :":"What's included:"}
                     </div>
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
                       {tab.includes.map((item, j) => (
@@ -2627,7 +2797,7 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
         )}
 
         <div style={{ textAlign:"center", marginTop:16, fontSize:11, color:"#94a3b8" }}>
-          <strong style={{ color:"#0ea5e9" }}>HealthDecoded</strong> · healthdecoded.com · AI-generated educational content only · Not a medical device · Always consult a qualified healthcare professional
+          <strong style={{ color:"#0ea5e9" }}>HealthDecoded</strong> · healthdecoded.com · {tx("footerNote")}
         </div>
       </div>
       </div>
