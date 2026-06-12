@@ -1,6 +1,5 @@
 // netlify/functions/payment-webhook.js
-// Called by Mollie when payment status changes
-// On success: generates full report via Claude + sends PDF by email via Resend
+import { getStore } from '@netlify/blobs';
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -15,27 +14,63 @@ export const handler = async (event) => {
       return { statusCode: 400, body: 'Missing payment ID' };
     }
 
-    // Verify payment status with Mollie
+    // Verify payment with Mollie
     const paymentResponse = await fetch(`https://api.mollie.com/v2/payments/${paymentId}`, {
       headers: { 'Authorization': `Bearer ${process.env.MOLLIE_API_KEY}` },
     });
 
     const payment = await paymentResponse.json();
 
-    // Only process paid payments
     if (payment.status !== 'paid') {
       return { statusCode: 200, body: 'Payment not paid yet' };
     }
 
-    const { email, reportType, reportData } = payment.metadata;
+    const { email, reportType } = payment.metadata;
 
     if (!email) {
-      return { statusCode: 400, body: 'Missing email in payment metadata' };
+      return { statusCode: 400, body: 'Missing email in metadata' };
     }
 
-    // Generate full report via Claude
-    const reportPrompt = buildReportPrompt(reportType, reportData);
-    
+    // Retrieve stored file from Netlify Blobs
+    let storedData = null;
+    let fileB64 = null;
+    let fileType = null;
+
+    try {
+      const store = getStore('lab-files');
+      const raw = await store.get(paymentId);
+      if (raw) {
+        storedData = JSON.parse(raw);
+        fileB64 = storedData.fileB64;
+        fileType = storedData.fileType;
+        console.log('File retrieved for payment:', paymentId);
+        // Clean up after retrieval
+        await store.delete(paymentId);
+      }
+    } catch (blobError) {
+      console.error('Blob retrieval error:', blobError);
+    }
+
+    // Build Claude message content
+    const userContent = [];
+
+    if (fileB64 && fileType) {
+      if (fileType === 'application/pdf') {
+        userContent.push({
+          type: 'document',
+          source: { type: 'base64', media_type: 'application/pdf', data: fileB64 }
+        });
+      } else {
+        userContent.push({
+          type: 'image',
+          source: { type: 'base64', media_type: fileType, data: fileB64 }
+        });
+      }
+    }
+
+    userContent.push({ type: 'text', text: buildReportPrompt(reportType, storedData?.reportData) });
+
+    // Generate report via Claude
     const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -46,7 +81,7 @@ export const handler = async (event) => {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4000,
-        messages: [{ role: 'user', content: reportPrompt }],
+        messages: [{ role: 'user', content: userContent }],
       }),
     });
 
@@ -60,10 +95,9 @@ export const handler = async (event) => {
       report = { summary: reportText, error: 'Could not parse structured report' };
     }
 
-    // Build HTML email with the report
-    const emailHtml = buildEmailHtml(report, reportType, email);
+    // Build and send email
+    const emailHtml = buildEmailHtml(report, reportType);
 
-    // Send email via Resend
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -91,32 +125,32 @@ export const handler = async (event) => {
   }
 };
 
-function buildReportPrompt(reportType, reportDataStr) {
-  const base = reportDataStr || '{}';
-  
+function buildReportPrompt(reportType, reportData) {
+  const data = reportData || {};
+
   if (reportType === 'lab') {
-    return `You are an expert clinical lab results interpreter and nutritionist. 
-Generate a complete, detailed health report based on the blood test data provided.
+    return `You are an expert clinical lab results interpreter and nutritionist.
+${data.fileB64 ? 'The blood test document is attached. Extract ALL biomarker values from it.' : 'No blood test file was provided — generate a general health education report.'}
 
-Return ONLY valid JSON with this structure:
-{"labSummary":"string","overallScore":number,"biomarkers":[{"name":"string","value":"string","referenceRange":"string","optimalRange":"string","status":"optimal|normal|borderline|concerning|critical","category":"string","interpretation":"string"}],"keyFindings":["string"],"retestPlan":{"timeframe":"string","reason":"string","markersToRetest":["string"],"expectedImprovements":"string"},"mealPlan":{"goal":"string","keyNutrients":["string"],"generalGuidelines":["string"],"days":[{"day":1,"dayName":"Monday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}}]},"recommendedTests":["string"],"doctorTalkingPoints":["string"]}
+Return ONLY valid JSON:
+{"labSummary":"string","overallScore":75,"biomarkers":[{"name":"string","value":"string","referenceRange":"string","optimalRange":"string","status":"optimal|normal|borderline|concerning|critical","category":"string","interpretation":"string (2-3 sentences explaining what this means, health implications, and what to do)"}],"keyFindings":["string"],"retestPlan":{"timeframe":"string","reason":"string","markersToRetest":["string"],"expectedImprovements":"string"},"mealPlan":{"goal":"string","keyNutrients":["string"],"generalGuidelines":["string"],"days":[{"day":1,"dayName":"Monday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":2,"dayName":"Tuesday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":3,"dayName":"Wednesday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":4,"dayName":"Thursday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":5,"dayName":"Friday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":6,"dayName":"Saturday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":7,"dayName":"Sunday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}}]},"recommendedTests":["string"],"doctorTalkingPoints":["string"]}
 
-Patient data: ${base}
 Return ONLY valid JSON. No markdown.`;
   }
 
-  return `You are an advanced AI health education assistant. Generate a complete health consultation report.
+  return `You are an advanced AI health education assistant.
+Generate a complete health consultation report based on the patient data below.
 
 Return ONLY valid JSON:
-{"urgency":{"level":1,"label":"string","color":"green","message":"string","showActions":true},"summary":"string","healthScore":{"metabolic":70,"weight":70,"sleep":70,"overall":70},"actionCards":[{"finding":"string","severity":"borderline","explanation":"string","actions":[{"type":"otc","title":"string","detail":"string","dose":"string","doNotUseIf":["string"],"pharmacistNote":"string"}],"retestIn":"string"}],"concerns":[{"name":"string","confidence":"Medium","reasoning":"string"}],"suggestedTests":[{"test":"string","reason":"string"}],"doctorQuestions":["string"],"homeEssentials":[{"item":"string","reason":"string"}]}
+{"urgency":{"level":1,"label":"Self-manageable","color":"green","message":"string","showActions":true},"summary":"string","healthScore":{"metabolic":70,"weight":70,"sleep":70,"overall":70},"actionCards":[{"finding":"string","severity":"borderline","explanation":"string","actions":[{"type":"otc","title":"string","detail":"string","dose":"string","doNotUseIf":["string"],"pharmacistNote":"string"}],"retestIn":"string"}],"concerns":[{"name":"string","confidence":"Medium","reasoning":"string"}],"suggestedTests":[{"test":"string","reason":"string"}],"doctorQuestions":["string"],"homeEssentials":[{"item":"string","reason":"string"}]}
 
-Patient data: ${base}
+Patient data: ${JSON.stringify(data)}
 Return ONLY valid JSON. No markdown.`;
 }
 
-function buildEmailHtml(report, reportType, email) {
+function buildEmailHtml(report, reportType) {
   const isLab = reportType === 'lab';
-  
+
   const statusColors = {
     optimal: '#16a34a', normal: '#0369a1', borderline: '#ca8a04',
     concerning: '#ea580c', critical: '#dc2626'
@@ -131,12 +165,14 @@ function buildEmailHtml(report, reportType, email) {
         const col = statusColors[b.status] || '#64748b';
         biomarkersHtml += `
           <div style="border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;overflow:hidden;">
-            <div style="background:#f8fafc;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
-              <div>
-                <strong style="color:#0f172a;">${b.name}</strong>
-                <span style="color:#64748b;font-size:13px;margin-left:10px;">Your value: <strong style="color:${col};">${b.value}</strong>${b.referenceRange ? ` · Ref: ${b.referenceRange}` : ''}${b.optimalRange ? ` · Optimal: ${b.optimalRange}` : ''}</span>
-              </div>
-              <span style="background:white;color:${col};border:1px solid ${col};border-radius:8px;padding:2px 10px;font-size:12px;font-weight:700;">${b.status}</span>
+            <div style="background:#f8fafc;padding:10px 14px;">
+              <strong style="color:#0f172a;">${b.name}</strong>
+              <span style="color:#64748b;font-size:13px;margin-left:10px;">
+                Your value: <strong style="color:${col};">${b.value}</strong>
+                ${b.referenceRange ? ` · Ref: ${b.referenceRange}` : ''}
+                ${b.optimalRange ? ` · Optimal: ${b.optimalRange}` : ''}
+              </span>
+              <span style="float:right;background:white;color:${col};border:1px solid ${col};border-radius:8px;padding:2px 10px;font-size:12px;font-weight:700;">${b.status}</span>
             </div>
             <div style="padding:12px 14px;font-size:13px;color:#374151;line-height:1.6;">${b.interpretation}</div>
           </div>`;
@@ -154,13 +190,13 @@ function buildEmailHtml(report, reportType, email) {
             ${card.retestIn ? `<span style="float:right;font-size:11px;color:#64748b;">Retest in ${card.retestIn}</span>` : ''}
           </div>
           <div style="padding:12px 14px;font-size:13px;color:#374151;">${card.explanation}</div>
-          ${card.actions?.map(a => `
+          ${(card.actions || []).map(a => `
             <div style="margin:0 14px 10px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
               <strong style="color:#16a34a;">💊 ${a.title}</strong><br>
               <span style="font-size:12px;color:#374151;">${a.detail}</span>
               ${a.dose ? `<br><span style="font-size:11px;color:#16a34a;font-weight:600;">📏 ${a.dose}</span>` : ''}
               ${a.pharmacistNote ? `<br><span style="font-size:11px;color:#ea580c;">🏪 Ask pharmacist: ${a.pharmacistNote}</span>` : ''}
-            </div>`).join('') || ''}
+            </div>`).join('')}
         </div>`;
     });
   }
@@ -169,57 +205,61 @@ function buildEmailHtml(report, reportType, email) {
   if (isLab && report.mealPlan?.days?.length > 0) {
     mealPlanHtml = `
       <h2 style="color:#1A5276;font-size:20px;border-bottom:2px solid #2E86C1;padding-bottom:8px;margin-top:32px;">🥗 Your 7-Day Meal Plan</h2>
-      <p style="color:#166534;background:#dcfce7;padding:10px;border-radius:6px;"><strong>Goal:</strong> ${report.mealPlan.goal}</p>
+      <p style="color:#166534;background:#dcfce7;padding:10px;border-radius:6px;margin-bottom:12px;"><strong>Goal:</strong> ${report.mealPlan.goal}</p>
       ${report.mealPlan.days.map(d => `
         <div style="border:1px solid #bbf7d0;border-radius:8px;margin-bottom:10px;overflow:hidden;">
           <div style="background:#16a34a;padding:8px 14px;color:white;font-weight:700;">Day ${d.day} — ${d.dayName}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;">
-            ${[['🌅 Breakfast', d.breakfast], ['☀️ Lunch', d.lunch], ['🌙 Dinner', d.dinner], ['🍎 Snack', d.snack]].map(([label, meal]) => meal ? `
-              <div style="background:#f0fdf4;border-radius:6px;padding:8px;">
+          <table width="100%" cellpadding="8" style="padding:10px;">
+            <tr>
+              ${[['🌅 Breakfast', d.breakfast], ['☀️ Lunch', d.lunch]].map(([label, meal]) => meal ? `
+              <td width="50%" style="background:#f0fdf4;border-radius:6px;padding:8px;vertical-align:top;">
                 <div style="font-size:11px;font-weight:700;color:#16a34a;">${label}</div>
                 <div style="font-size:12px;font-weight:600;color:#1e293b;">${meal.meal}</div>
                 <div style="font-size:11px;color:#64748b;font-style:italic;">${meal.why}</div>
-              </div>` : '').join('')}
-          </div>
+              </td>` : '<td></td>').join('')}
+            </tr>
+            <tr>
+              ${[['🌙 Dinner', d.dinner], ['🍎 Snack', d.snack]].map(([label, meal]) => meal ? `
+              <td width="50%" style="background:#f0fdf4;border-radius:6px;padding:8px;vertical-align:top;">
+                <div style="font-size:11px;font-weight:700;color:#16a34a;">${label}</div>
+                <div style="font-size:12px;font-weight:600;color:#1e293b;">${meal.meal}</div>
+                <div style="font-size:11px;color:#64748b;font-style:italic;">${meal.why}</div>
+              </td>` : '<td></td>').join('')}
+            </tr>
+          </table>
         </div>`).join('')}`;
   }
 
-  return `
-<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
 <body style="font-family:Arial,sans-serif;background:#f0f9ff;margin:0;padding:20px;">
   <div style="max-width:680px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
-    
-    <!-- Header -->
+
     <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:32px 32px 24px;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#7dd3fc;text-transform:uppercase;margin-bottom:6px;">HealthDecoded</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#7dd3fc;text-transform:uppercase;margin-bottom:6px;">HEALTHDECODED</div>
       <h1 style="color:white;font-size:24px;margin:0 0 8px;">${isLab ? 'Your Blood Test Analysis' : 'Your Health Consultation Report'}</h1>
       <p style="color:#94a3b8;font-size:13px;margin:0;">AI-generated educational content · Not a medical diagnosis</p>
     </div>
 
     <div style="padding:32px;">
-      
-      <!-- Disclaimer -->
+
       <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:12px;color:#92400e;">
         <strong>Important:</strong> This report is generated by AI for educational purposes only. It is not a diagnosis and does not replace consultation with a qualified healthcare professional. Always discuss your results with your doctor or pharmacist.
       </div>
 
       ${isLab && report.overallScore ? `
-      <!-- Score -->
       <div style="text-align:center;margin-bottom:24px;">
-        <div style="display:inline-block;width:80px;height:80px;border-radius:50%;background:${report.overallScore >= 70 ? '#dcfce7' : report.overallScore >= 50 ? '#fef9c3' : '#fee2e2'};border:3px solid ${report.overallScore >= 70 ? '#16a34a' : report.overallScore >= 50 ? '#ca8a04' : '#dc2626'};line-height:80px;font-size:24px;font-weight:800;color:${report.overallScore >= 70 ? '#16a34a' : report.overallScore >= 50 ? '#ca8a04' : '#dc2626'};">${report.overallScore}</div>
+        <div style="display:inline-block;width:80px;height:80px;border-radius:50%;
+          background:${report.overallScore >= 70 ? '#dcfce7' : report.overallScore >= 50 ? '#fef9c3' : '#fee2e2'};
+          border:3px solid ${report.overallScore >= 70 ? '#16a34a' : report.overallScore >= 50 ? '#ca8a04' : '#dc2626'};
+          line-height:80px;font-size:24px;font-weight:800;
+          color:${report.overallScore >= 70 ? '#16a34a' : report.overallScore >= 50 ? '#ca8a04' : '#dc2626'};">
+          ${report.overallScore}
+        </div>
         <div style="font-size:12px;color:#64748b;margin-top:4px;">Overall Score</div>
       </div>` : ''}
 
-      ${!isLab && report.urgency ? `
-      <!-- Urgency -->
-      <div style="border-radius:12px;padding:16px;margin-bottom:20px;background:${report.urgency.color === 'green' ? '#dcfce7' : report.urgency.color === 'yellow' ? '#fef9c3' : report.urgency.color === 'orange' ? '#fff7ed' : '#fee2e2'};border:2px solid ${report.urgency.color === 'green' ? '#16a34a' : report.urgency.color === 'yellow' ? '#ca8a04' : report.urgency.color === 'orange' ? '#ea580c' : '#dc2626'};">
-        <div style="font-size:13px;font-weight:700;">Urgency Level ${report.urgency.level}/5 — ${report.urgency.label}</div>
-        <div style="font-size:13px;margin-top:6px;">${report.urgency.message}</div>
-      </div>` : ''}
-
-      <!-- Summary -->
       ${report.summary || report.labSummary ? `
       <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:24px;font-size:14px;color:#0369a1;line-height:1.6;">
         ${report.summary || report.labSummary}
@@ -227,17 +267,23 @@ function buildEmailHtml(report, reportType, email) {
 
       ${isLab && report.keyFindings?.length > 0 ? `
       <h2 style="color:#1A5276;font-size:20px;border-bottom:2px solid #2E86C1;padding-bottom:8px;">🎯 Key Findings</h2>
-      ${report.keyFindings.map((f, i) => `<div style="padding:8px 12px;background:#f0f9ff;border-left:3px solid #0ea5e9;margin-bottom:8px;font-size:13px;border-radius:4px;">${i + 1}. ${f}</div>`).join('')}` : ''}
+      ${report.keyFindings.map((f, i) => `
+        <div style="padding:8px 12px;background:#f0f9ff;border-left:3px solid #0ea5e9;margin-bottom:8px;font-size:13px;border-radius:4px;">${i + 1}. ${f}</div>`).join('')}` : ''}
 
-      ${biomarkersHtml ? `<h2 style="color:#1A5276;font-size:20px;border-bottom:2px solid #2E86C1;padding-bottom:8px;margin-top:32px;">🔬 Biomarker Analysis</h2>${biomarkersHtml}` : ''}
+      ${biomarkersHtml ? `
+      <h2 style="color:#1A5276;font-size:20px;border-bottom:2px solid #2E86C1;padding-bottom:8px;margin-top:32px;">🔬 Biomarker Analysis</h2>
+      ${biomarkersHtml}` : ''}
 
-      ${actionCardsHtml ? `<h2 style="color:#1A5276;font-size:20px;border-bottom:2px solid #2E86C1;padding-bottom:8px;margin-top:32px;">🎯 Action Plan</h2>${actionCardsHtml}` : ''}
+      ${actionCardsHtml ? `
+      <h2 style="color:#1A5276;font-size:20px;border-bottom:2px solid #2E86C1;padding-bottom:8px;margin-top:32px;">🎯 Action Plan</h2>
+      ${actionCardsHtml}` : ''}
 
       ${mealPlanHtml}
 
-      ${report.doctorTalkingPoints?.length > 0 || report.doctorQuestions?.length > 0 ? `
+      ${(report.doctorTalkingPoints || report.doctorQuestions)?.length > 0 ? `
       <h2 style="color:#1A5276;font-size:20px;border-bottom:2px solid #2E86C1;padding-bottom:8px;margin-top:32px;">💬 What to Discuss with Your Doctor</h2>
-      ${(report.doctorTalkingPoints || report.doctorQuestions || []).map(q => `<div style="padding:8px 12px;background:#f0f9ff;border-left:3px solid #0ea5e9;margin-bottom:8px;font-size:13px;border-radius:4px;">${q}</div>`).join('')}` : ''}
+      ${(report.doctorTalkingPoints || report.doctorQuestions || []).map(q => `
+        <div style="padding:8px 12px;background:#f0f9ff;border-left:3px solid #0ea5e9;margin-bottom:8px;font-size:13px;border-radius:4px;">${q}</div>`).join('')}` : ''}
 
       ${isLab && report.retestPlan ? `
       <h2 style="color:#1A5276;font-size:20px;border-bottom:2px solid #2E86C1;padding-bottom:8px;margin-top:32px;">🔁 When to Retest</h2>
@@ -247,7 +293,6 @@ function buildEmailHtml(report, reportType, email) {
         <span style="font-size:13px;"><strong>Expected improvements:</strong> ${report.retestPlan.expectedImprovements}</span>
       </div>` : ''}
 
-      <!-- Upsell -->
       <div style="background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:12px;padding:20px;margin-top:32px;text-align:center;">
         <div style="font-size:15px;font-weight:700;color:#7c3aed;margin-bottom:8px;">
           ${isLab ? 'Want a deeper analysis?' : 'Want to analyse your blood tests too?'}
@@ -262,12 +307,12 @@ function buildEmailHtml(report, reportType, email) {
 
     </div>
 
-    <!-- Footer -->
     <div style="background:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;text-align:center;">
       <div style="font-size:13px;font-weight:700;color:#0ea5e9;margin-bottom:4px;">HealthDecoded</div>
       <div style="font-size:11px;color:#94a3b8;">healthdecoded.netlify.app · AI-generated educational content only · Not a medical device</div>
       <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Always consult a qualified healthcare professional</div>
     </div>
+
   </div>
 </body>
 </html>`;
