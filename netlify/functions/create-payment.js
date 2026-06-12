@@ -57,7 +57,7 @@ export const handler = async (event) => {
       amount: { currency: 'EUR', value: amount === '4.90' ? '4.90' : '9.90' },
       description: description || `HealthDecoded — ${reportType === 'lab' ? 'Lab Results Report' : 'Health Consultation Report'}`,
       redirectUrl: `${process.env.URL || 'https://healthdecoded.netlify.app'}/.netlify/functions/get-payment?email=${encodeURIComponent(email)}&type=${reportType}`,
-      webhookUrl: `${process.env.URL || 'https://healthdecoded.netlify.app'}/.netlify/functions/payment-webhook',
+      webhookUrl: `${process.env.URL || 'https://healthdecoded.netlify.app'}/.netlify/functions/payment-webhook`,
       metadata: {
         email,
         reportType,
