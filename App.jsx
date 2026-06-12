@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 const ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
 const SECTIONS = ["Profile","Symptoms","Vitals","Blood Tests","Medications","Timeline","Report"];
