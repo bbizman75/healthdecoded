@@ -2579,7 +2579,7 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
       }}>
         <div style={{ maxWidth:680, margin:"0 auto", display:"flex", alignItems:"center", gap:10 }}>
 <div style={{ fontSize:15, fontWeight:800, color:"#0f172a", flexShrink:0, marginRight:4, display:"flex", alignItems:"center", gap:6 }}>
-  <img src="icon-192.png" style={{ height:"28px", width:"28px", borderRadius:"6px" }} />
+  <svg width="28" height="28" viewBox="0 0 512 512" style={{ borderRadius:"6px", flexShrink:0 }}><rect width="512" height="512" rx="100" fill="#0a1628"/><rect x="80" y="80" width="90" height="260" rx="10" fill="#1a5fd4"/><rect x="80" y="185" width="270" height="70" rx="10" fill="#1a5fd4"/><rect x="260" y="255" width="90" height="85" rx="10" fill="#1a5fd4"/><rect x="260" y="80" width="28" height="28" rx="5" fill="#1ab8e8"/><rect x="294" y="80" width="28" height="28" rx="5" fill="#1ab8e8"/><rect x="328" y="80" width="28" height="28" rx="5" fill="#1ab8e8"/><rect x="362" y="80" width="28" height="28" rx="5" fill="#1ab8e8"/><rect x="260" y="114" width="28" height="28" rx="5" fill="#1ab8e8" opacity="0.85"/><rect x="294" y="114" width="28" height="28" rx="5" fill="#1ab8e8" opacity="0.7"/><rect x="328" y="114" width="28" height="28" rx="5" fill="#00d4ff" opacity="0.5"/><rect x="260" y="148" width="28" height="28" rx="5" fill="#1ab8e8" opacity="0.6"/><rect x="294" y="148" width="22" height="22" rx="4" fill="#00d4ff" opacity="0.35"/></svg>
   Health<span style={{ color:"#0ea5e9" }}>Decoded</span>
 </div>        
           {[
