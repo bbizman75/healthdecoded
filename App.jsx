@@ -2578,9 +2578,10 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
         padding:"8px 16px"
       }}>
         <div style={{ maxWidth:680, margin:"0 auto", display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ fontSize:15, fontWeight:800, color:"#0f172a", flexShrink:0, marginRight:4 }}>
-            Health<span style={{ color:"#0ea5e9" }}>Decoded</span>
-          </div>
+<div style={{ fontSize:15, fontWeight:800, color:"#0f172a", flexShrink:0, marginRight:4, display:"flex", alignItems:"center", gap:6 }}>
+  <img src="/icon-192.png" style={{ height:"28px", width:"28px", borderRadius:"6px" }} />
+  Health<span style={{ color:"#0ea5e9" }}>Decoded</span>
+</div>        
           {[
             { icon:"🔬", label:tx("labResults"),  price:"€4.90", color:"#0369a1", bg:"#e0f2fe" },
             { icon:"🩺", label:tx("consultation"), price:"€9.90", color:"#7c3aed", bg:"#f3e8ff" },
