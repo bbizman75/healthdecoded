@@ -2350,9 +2350,11 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
                   amount: payGate.tab === 0 ? "4.90" : "9.90",
                   reportType: payGate.tab === 0 ? "lab" : "consultation",
                   description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
-                  reportData: payGate.tab === 0
-                    ? { labFile: labTab.fileB64 ? "uploaded" : "none", fileName: labTab.fileName }
-                    : { age, sex, height, weight, symptoms: selSyms, medications: meds, allergies, timeline }
+reportData: payGate.tab === 0
+  ? { fileName: labTab.fileName }
+  : { age, sex, height, weight, symptoms: selSyms, medications: meds, allergies, timeline },
+fileB64: payGate.tab === 0 ? labTab.fileB64 : null,
+fileType: payGate.tab === 0 ? labTab.fileType : null,
                 })
               });
               const data = await res.json();
