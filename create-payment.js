@@ -1,5 +1,5 @@
 // netlify/functions/create-payment.js
-// Creates a Mollie payment and returns the checkout URL
+import { getStore } from '@netlify/blobs';
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -7,14 +7,13 @@ export const handler = async (event) => {
   }
 
   try {
-    const { email, amount, description, reportType, reportData } = JSON.parse(event.body);
+    const { email, amount, description, reportType, reportData, fileB64, fileType, fileName } = JSON.parse(event.body);
 
     if (!email || !amount) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing email or amount' }) };
     }
 
-    // Store report data temporarily in payment metadata
-    // We'll retrieve it in the webhook after payment
+    // Create Mollie payment
     const paymentBody = {
       amount: {
         currency: 'EUR',
@@ -26,11 +25,11 @@ export const handler = async (event) => {
       metadata: {
         email,
         reportType,
-        reportData: JSON.stringify(reportData).substring(0, 1000), // Mollie metadata limit
+        reportData: JSON.stringify(reportData || {}),
       },
     };
 
-    const response = await fetch('https://api.mollie.com/v2/payments', {
+    const mollieResponse = await fetch('https://api.mollie.com/v2/payments', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.MOLLIE_API_KEY}`,
@@ -39,30 +38,39 @@ export const handler = async (event) => {
       body: JSON.stringify(paymentBody),
     });
 
-    const payment = await response.json();
+    const payment = await mollieResponse.json();
 
-    if (!payment._links?.checkout?.href) {
+    if (!payment.id) {
       console.error('Mollie error:', payment);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'Failed to create payment', details: payment }),
-      };
+      return { statusCode: 500, body: JSON.stringify({ error: 'Payment creation failed' }) };
+    }
+
+    // Store file in Netlify Blobs if provided
+    if (fileB64 && fileType) {
+      try {
+        const store = getStore('lab-files');
+        await store.set(payment.id, JSON.stringify({
+          fileB64,
+          fileType,
+          fileName: fileName || 'lab-report',
+          email,
+          reportType,
+          reportData: reportData || {},
+        }));
+        console.log('File stored for payment:', payment.id);
+      } catch (blobError) {
+        console.error('Blob storage error:', blobError);
+        // Continue anyway — report will be generated without file
+      }
     }
 
     return {
       statusCode: 200,
-      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        paymentId: payment.id,
-        checkoutUrl: payment._links.checkout.href,
-      }),
+      body: JSON.stringify({ checkoutUrl: payment._links.checkout.href }),
     };
 
   } catch (error) {
     console.error('create-payment error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   }
 };
