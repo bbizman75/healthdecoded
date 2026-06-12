@@ -2579,7 +2579,7 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
       }}>
         <div style={{ maxWidth:680, margin:"0 auto", display:"flex", alignItems:"center", gap:10 }}>
 <div style={{ fontSize:15, fontWeight:800, color:"#0f172a", flexShrink:0, marginRight:4, display:"flex", alignItems:"center", gap:6 }}>
-  <img src="/icon-192.png" style={{ height:"28px", width:"28px", borderRadius:"6px" }} />
+  <img src="icon-192.png" style={{ height:"28px", width:"28px", borderRadius:"6px" }} />
   Health<span style={{ color:"#0ea5e9" }}>Decoded</span>
 </div>        
           {[
