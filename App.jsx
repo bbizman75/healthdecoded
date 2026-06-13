@@ -1404,8 +1404,7 @@ Return ONLY this JSON structure:
     "expectedImprovements": string (what should improve with the meal plan)
   },
  
-
-The attached document is a blood test report. Extract every biomarker value present.
+ The attached document is a blood test report. Extract every biomarker value present.
 Return ONLY valid JSON. No markdown.`;
 
     try {
