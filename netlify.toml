@@ -6,7 +6,7 @@
 [functions]
   node_bundler = "esbuild"
 
-[functions."payment-webhook-background"]
+[functions."generate-report-background"]
   timeout = 900
 
 [[redirects]]
