@@ -2672,7 +2672,7 @@ teaser: payGate.preview || "",
             {
               icon:"🔬",
               label:tx("labResults"),
-              price:"€4.90",
+              price:"€1.00",
               priceColor:"#0369a1",
               priceBg:"#e0f2fe",
               pitch:tx("tab1Pitch"),
