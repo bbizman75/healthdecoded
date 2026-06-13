@@ -2356,7 +2356,7 @@ const res = await fetch("/.netlify/functions/create-payment", {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 email: payGate.email,
-                amount: payGate.tab === 0 ? "4.90" : "9.90",
+                amount: payGate.tab === 0 ? "1.00" : "9.90",
                 reportType: payGate.tab === 0 ? "lab" : "consultation",
                 description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
                 description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
