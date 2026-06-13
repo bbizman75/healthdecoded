@@ -1449,14 +1449,7 @@ Return ONLY valid JSON. No markdown.`;
       .biomarker-body { padding: 10px 12px; font-size: 12px; color: #374151; line-height: 1.6; }
       .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; }
       .finding { margin-bottom: 6px; padding: 6px 10px; background: #f0f9ff; border-left: 3px solid #0ea5e9; border-radius: 4px; }
-      .day-card { border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
-      .day-header { background: #16a34a; color: #fff; padding: 6px 12px; font-weight: 700; font-size: 13px; }
-      .meal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px; }
-      .meal-item { background: #f0fdf4; border-radius: 6px; padding: 6px 8px; }
-      .meal-label { font-size: 10px; font-weight: 700; color: #16a34a; margin-bottom: 2px; }
-      .meal-name { font-size: 12px; font-weight: 600; color: #1e293b; }
-      .meal-why { font-size: 10px; color: #64748b; font-style: italic; }
-      .retest-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+         .retest-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
       .tag { display: inline-block; font-size: 11px; background: #fff; color: #92400e; padding: 3px 10px; border-radius: 8px; border: 1px solid #fde68a; margin: 3px; font-weight: 600; }
       .q-item { font-size: 12px; padding: 7px 10px; background: #f0f9ff; border-radius: 5px; border-left: 3px solid #0ea5e9; margin-bottom: 6px; }
       @media print { body { padding: 16px; } }
