@@ -2342,32 +2342,48 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
             }
             updatePayGate({ previewLoading: true });
             try {
-              const res = await fetch("/.netlify/functions/create-payment", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email: payGate.email,
-                  amount: payGate.tab === 0 ? "4.90" : "9.90",
-                  reportType: payGate.tab === 0 ? "lab" : "consultation",
-                  description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
-reportData: payGate.tab === 0
-  ? { fileName: labTab.fileName }
-  : { age, sex, height, weight, symptoms: selSyms, medications: meds, allergies, timeline },
-fileB64: payGate.tab === 0 ? labTab.fileB64 : null,
-fileType: payGate.tab === 0 ? labTab.fileType : null,
-                })
-              });
-              const data = await res.json();
-              if (data.checkoutUrl) {
-                window.location.href = data.checkoutUrl;
+// Step 1: Generate full report in browser first
+            const isLab = payGate.tab === 0;
+            const content = [];
+            if (isLab && labTab.fileB64) {
+              if (labTab.fileType === "application/pdf") {
+                content.push({ type:"document", source:{ type:"base64", media_type:"application/pdf", data:labTab.fileB64 } });
               } else {
-                alert("Payment setup failed. Please try again.");
-                updatePayGate({ previewLoading: false });
+                content.push({ type:"image", source:{ type:"base64", media_type:labTab.fileType, data:labTab.fileB64 } });
               }
-            } catch(e) {
+            }
+            content.push({ type:"text", text: isLab
+              ? `Analyse this blood test. Return ONLY valid JSON: {"labSummary":"string","overallScore":75,"biomarkers":[{"name":"string","value":"string","referenceRange":"string","optimalRange":"string","status":"optimal|normal|borderline|concerning|critical","category":"string","interpretation":"string"}],"keyFindings":["string"],"retestPlan":{"timeframe":"string","reason":"string","markersToRetest":["string"],"expectedImprovements":"string"},"mealPlan":{"goal":"string","keyNutrients":["string"],"generalGuidelines":["string"],"days":[{"day":1,"dayName":"Monday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":2,"dayName":"Tuesday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":3,"dayName":"Wednesday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":4,"dayName":"Thursday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":5,"dayName":"Friday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":6,"dayName":"Saturday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":7,"dayName":"Sunday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}}]},"recommendedTests":["string"],"doctorTalkingPoints":["string"]} No markdown.`
+              : `Generate health consultation. Return ONLY valid JSON: {"urgency":{"level":1,"label":"Self-manageable","color":"green","message":"string","showActions":true},"summary":"string","healthScore":{"metabolic":70,"weight":70,"sleep":70,"overall":70},"actionCards":[{"finding":"string","severity":"borderline","explanation":"string","actions":[{"type":"diet","title":"string","detail":"string","dose":"","doNotUseIf":[],"pharmacistNote":""}],"retestIn":"string"}],"concerns":[{"name":"string","confidence":"Medium","reasoning":"string"}],"suggestedTests":[{"test":"string","reason":"string"}],"doctorQuestions":["string"],"homeEssentials":[{"item":"string","reason":"string"}]} Patient: Age ${age}, Sex ${sex}, Symptoms: ${selSyms.join(", ")||"None"}, Meds: ${meds.filter(m=>m.name).map(m=>m.name).join(", ")||"None"}. No markdown.`
+            });
+            const cr = await fetch("/.netlify/functions/claude", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 4000, messages: [{ role: "user", content }] })
+            });
+            const cd = await cr.json();
+            const reportJson = JSON.parse(cd.content.map(i => i.text||"").join("").replace(/```json|```/g,"").trim());
+            // Step 2: Create payment with report in metadata
+            const res = await fetch("/.netlify/functions/create-payment", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: payGate.email,
+                amount: payGate.tab === 0 ? "4.90" : "9.90",
+                reportType: payGate.tab === 0 ? "lab" : "consultation",
+                description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
+                report: reportJson,
+              })
+            });
+            const data = await res.json();
+            if (data.checkoutUrl) {
+              window.location.href = data.checkoutUrl;
+            } else {
               alert("Payment setup failed. Please try again.");
               updatePayGate({ previewLoading: false });
             }
+          } catch(e) {
+            alert("Something went wrong generating your report. Please try again.");
+            updatePayGate({ previewLoading: false });
+          }
           }}
           disabled={payGate.previewLoading}
           style={{
