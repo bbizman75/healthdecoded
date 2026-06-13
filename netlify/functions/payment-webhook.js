@@ -19,6 +19,14 @@ export async function handler(event) {
     console.log("Payment status:", payment.status);
     if (payment.status !== "paid") return { statusCode: 200, body: "OK" };
 
+    // Prevent duplicate processing
+    const processedKey = `processed_${paymentId}`;
+    if (global[processedKey]) {
+      console.log("Already processed, skipping:", paymentId);
+      return { statusCode: 200, body: "OK" };
+    }
+    global[processedKey] = true;
+
     const meta = payment.metadata || {};
     const email = meta.email;
     const reportType = meta.reportType || "lab";
