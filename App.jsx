@@ -106,7 +106,7 @@ const TRANSLATIONS = {
     tab1Pitch: "Vous avez vos résultats d'analyses ? Ne les rangez pas dans un tiroir.",
     tab1Desc: "Nous lisons chaque marqueur — ce qu'il signifie, ce qui est optimal (pas juste \"normal\"), ce que vous devriez manger, quel complément prendre, et exactement quand refaire vos analyses. L'analyse détaillée que votre médecin n'a pas eu le temps de vous donner. Prêt en 60 secondes.",
     tab1Tag: "Le plus populaire",
-    tab1Includes: ["Chaque biomarqueur expliqué en détail","Valeur optimale vs valeur de référence — la vraie différence","Actions OTC et diète spécifiques par résultat","Plan alimentaire 7 jours ciblé sur vos carences","Calendrier de retest — quand et quoi refaire","Rapport PDF à conserver et partager"],
+    tab1Includes: ["Chaque biomarqueur expliqué en détail","Valeur optimale vs valeur de référence — la vraie différence","Actions OTC et diète spécifiques par résultat","Calendrier de retest — quand et quoi refaire","Rapport PDF à conserver et partager"],
     tab2Pitch: "Quelque chose ne va pas mais personne ne fait le lien.",
     tab2Desc: "Dites-nous vos symptômes, médicaments, allergies et antécédents. Importez vos analyses si vous en avez. Nous croisons tout — des patterns qui nécessiteraient 3 consultations — et vous donnons un plan d'action complet avec score d'urgence, conseils OTC vérifiés contre vos allergies et traitements, et les questions exactes à poser à votre prochain rendez-vous.",
     tab2Tag: "Le plus complet",
