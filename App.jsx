@@ -19,7 +19,7 @@ const TRANSLATIONS = {
     tab1Pitch: "Got your blood test back? Don't just file it away.",
     tab1Desc: "We read every single marker — what it means, what's optimal (not just \"normal\"), what you should eat, which OTC supplement to take, and exactly when to retest. The detailed analysis your doctor didn't have time to give you. Ready in 60 seconds.",
     tab1Tag: "Most popular",
-    tab1Includes: ["Every biomarker explained in full","Optimal vs reference range — the real difference","Specific OTC & diet actions per finding","7-day meal plan targeted to your deficiencies","Retest roadmap — when and what to recheck","PDF report to keep and share"],
+    tab1Includes: ["Every biomarker explained in full","Optimal vs reference range — the real difference","Specific OTC & diet actions per finding","Retest roadmap — when and what to recheck","PDF report to keep and share"],
     tab2Pitch: "Something feels wrong but nobody's connecting the dots.",
     tab2Desc: "Tell us your symptoms, medications, allergies, and health history. Upload your blood tests if you have them. We cross-reference everything — patterns that would take 3 appointments to uncover — and give you a complete action plan with urgency scoring, OTC guidance checked against your allergies and drugs, and the exact questions to bring to your next appointment.",
     tab2Tag: "Most complete",
