@@ -629,7 +629,8 @@ export default function App() {
   // ── Payment gate state ────────────────────────────────────────────────
   const [payGate, setPayGate] = useState({
     show: false,       // is payment gate visible
-    preview: null,     // teaser text from Claude
+    preview: null,
+    fullReport: null,     // teaser text from Claude
     previewLoading: false,
     email: "",
     paid: false,
