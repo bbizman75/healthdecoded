@@ -1403,22 +1403,7 @@ Return ONLY this JSON structure:
     "markersToRetest": [string] (specific markers most important to recheck),
     "expectedImprovements": string (what should improve with the meal plan)
   },
-  "mealPlan": {
-    "goal": string (what this meal plan targets based on the blood results — e.g. "Improve iron levels, reduce inflammation, support thyroid function"),
-    "keyNutrients": [string] (nutrients prioritised and why — e.g. "Iron: your ferritin of 12 is low"),
-    "generalGuidelines": [string] (3-4 key dietary principles for this profile),
-    "days": [
-      {
-        "day": number (1-7),
-        "dayName": string (e.g. "Monday"),
-        "breakfast": { "meal": string, "why": string },
-        "lunch": { "meal": string, "why": string },
-        "dinner": { "meal": string, "why": string },
-        "snack": { "meal": string, "why": string }
-      }
-    ]
-  }
-}
+ 
 
 The attached document is a blood test report. Extract every biomarker value present.
 Return ONLY valid JSON. No markdown.`;
