@@ -2223,7 +2223,21 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
       });
       const data = await res.json();
       const txt = data.content.map(i => i.text||"").join("");
-      updatePayGate({ preview:txt, previewLoading:false });
+      // Also generate full report silently using same file
+const fullPrompt = isLab
+  ? `Analyse this blood test. Return ONLY valid JSON: {"labSummary":"string","overallScore":75,"biomarkers":[{"name":"string","value":"string","referenceRange":"string","optimalRange":"string","status":"optimal|normal|borderline|concerning|critical","category":"string","interpretation":"string"}],"keyFindings":["string"],"retestPlan":{"timeframe":"string","reason":"string","markersToRetest":["string"],"expectedImprovements":"string"},"mealPlan":{"goal":"string","keyNutrients":["string"],"generalGuidelines":["string"],"days":[{"day":1,"dayName":"Monday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":2,"dayName":"Tuesday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":3,"dayName":"Wednesday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":4,"dayName":"Thursday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":5,"dayName":"Friday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":6,"dayName":"Saturday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":7,"dayName":"Sunday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}}]},"recommendedTests":["string"],"doctorTalkingPoints":["string"]} No markdown.`
+  : `Generate health consultation. Return ONLY valid JSON: {"urgency":{"level":1,"label":"Self-manageable","color":"green","message":"string","showActions":true},"summary":"string","healthScore":{"metabolic":70,"weight":70,"sleep":70,"overall":70},"actionCards":[{"finding":"string","severity":"borderline","explanation":"string","actions":[{"type":"diet","title":"string","detail":"string","dose":"","doNotUseIf":[],"pharmacistNote":""}],"retestIn":"string"}],"concerns":[{"name":"string","confidence":"Medium","reasoning":"string"}],"suggestedTests":[{"test":"string","reason":"string"}],"doctorQuestions":["string"],"homeEssentials":[{"item":"string","reason":"string"}]} Patient: Age ${age}, Sex ${sex}, Symptoms: ${selSyms.join(", ")||"None"}. No markdown.`;
+const fullContent = [...content.slice(0,-1), { type:"text", text:fullPrompt }];
+let fullReport = null;
+try {
+  const fr = await fetch("/.netlify/functions/claude", {
+    method:"POST", headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ model:ANTHROPIC_MODEL, max_tokens:4000, messages:[{ role:"user", content:fullContent }] })
+  });
+  const fd = await fr.json();
+  fullReport = JSON.parse(fd.content.map(i=>i.text||"").join("").replace(/```json|```/g,"").trim());
+} catch(e) { console.error("Full report generation failed:", e); }
+updatePayGate({ preview:txt, fullReport, previewLoading:false });
     } catch(e) {
       updatePayGate({ preview:"Your data has been analysed and we've identified several areas worth examining in detail. Unlock your full report to see everything.", previewLoading:false });
     }
