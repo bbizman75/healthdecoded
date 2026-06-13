@@ -2183,28 +2183,9 @@ Return ONLY valid JSON. No markdown.`;
   };
 
   // ── Generate preview teaser (free, before payment) ───────────────────
-  const generatePreview = async (tab) => {
+ const generatePreview = async (tab) => {
     updatePayGate({ show:true, tab, previewLoading:true, preview:null });
     const isLab = tab === 0;
-    const previewPrompt = isLab
-      ? `You are an AI health analyst. The user has uploaded their blood test report. Generate a 3-sentence teaser that:
-1. Mentions how many biomarkers you found and a general health picture
-2. Hints at 1-2 specific findings without fully explaining them (create curiosity)
-3. States what the full report will include
-
-Be specific enough to show real value. Do NOT give the full analysis. End with "Unlock your full report to see everything."
-Return ONLY plain text — no JSON, no markdown.`
-      : `You are an AI health analyst. Based on the patient profile below, generate a 3-sentence teaser that:
-1. Acknowledges the key symptoms/concerns entered
-2. Hints at 1-2 patterns you've detected without fully explaining them
-3. States what the full consultation report will include
-
-Be specific. Create genuine curiosity. Do NOT give the full analysis. End with "Unlock your full report to see everything."
-Return ONLY plain text — no JSON, no markdown.
-
-Patient: Age ${age}, Sex ${sex}, BMI ${bmi||"?"}
-Symptoms: ${selSyms.slice(0,3).join(", ")||"None entered"}
-Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"None"}`;
 
     try {
       const content = [];
@@ -2215,25 +2196,46 @@ Medications: ${meds.filter(m=>m.name).map(m=>m.name).slice(0,2).join(", ")||"Non
           content.push({ type:"image", source:{ type:"base64", media_type:labTab.fileType, data:labTab.fileB64 } });
         }
       }
-      content.push({ type:"text", text: isLab
-        ? `Analyse this blood test. Return ONLY valid JSON with exactly two fields: {"teaser":"3 sentence preview of findings, end with: Unlock your full report to see everything.","report":{"labSummary":"string","overallScore":75,"biomarkers":[{"name":"string","value":"string","referenceRange":"string","optimalRange":"string","status":"optimal|normal|borderline|concerning|critical","category":"string","interpretation":"string"}],"keyFindings":["string"],"retestPlan":{"timeframe":"string","reason":"string","markersToRetest":["string"],"expectedImprovements":"string"},"mealPlan":{"goal":"string","keyNutrients":["string"],"generalGuidelines":["string"],"days":[{"day":1,"dayName":"Monday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":2,"dayName":"Tuesday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":3,"dayName":"Wednesday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":4,"dayName":"Thursday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":5,"dayName":"Friday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":6,"dayName":"Saturday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}},{"day":7,"dayName":"Sunday","breakfast":{"meal":"string","why":"string"},"lunch":{"meal":"string","why":"string"},"dinner":{"meal":"string","why":"string"},"snack":{"meal":"string","why":"string"}}]},"recommendedTests":["string"],"doctorTalkingPoints":["string"]}} No markdown.`
-        : `Generate health consultation. Return ONLY valid JSON with exactly two fields: {"teaser":"3 sentence preview, end with: Unlock your full report to see everything.","report":{"urgency":{"level":1,"label":"Self-manageable","color":"green","message":"string","showActions":true},"summary":"string","healthScore":{"metabolic":70,"weight":70,"sleep":70,"overall":70},"actionCards":[{"finding":"string","severity":"borderline","explanation":"string","actions":[{"type":"diet","title":"string","detail":"string","dose":"","doNotUseIf":[],"pharmacistNote":""}],"retestIn":"string"}],"concerns":[{"name":"string","confidence":"Medium","reasoning":"string"}],"suggestedTests":[{"test":"string","reason":"string"}],"doctorQuestions":["string"],"homeEssentials":[{"item":"string","reason":"string"}]}} Patient: Age ${age}, Sex ${sex}, Symptoms: ${selSyms.join(", ")||"None"}. No markdown.`
-      });
+
+      const teaserPrompt = isLab
+        ? `Analyse this blood test. Return ONLY a 2-3 sentence teaser that mentions how many biomarkers you found, hints at 1-2 specific findings (create curiosity), and ends with "Unlock your full report to see everything." Return plain text only.`
+        : `Based on this patient profile: Age ${age}, Sex ${sex}, Symptoms: ${selSyms.slice(0,3).join(", ")||"None"}. Write a 2-3 sentence teaser hinting at patterns detected. End with "Unlock your full report to see everything." Plain text only.`;
+
+      content.push({ type:"text", text:teaserPrompt });
+
       const res = await fetch("/.netlify/functions/claude", {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ model:ANTHROPIC_MODEL, max_tokens:4000, messages:[{ role:"user", content }] })
+        body: JSON.stringify({ model:ANTHROPIC_MODEL, max_tokens:150, messages:[{ role:"user", content }] })
       });
       const data = await res.json();
-      const parsed = JSON.parse(data.content.map(i => i.text||"").join("").replace(/```json|```/g,"").trim());
-      const txt = parsed.teaser || "Your report has been analysed. Unlock your full report to see everything.";
-      const fullReport = parsed.report || null;
-      updatePayGate({ preview:txt, fullReport, previewLoading:false });
+      const txt = data.content.map(i => i.text||"").join("");
+
+      let blobKey = null;
+      if (isLab && labTab.fileB64) {
+        const storeRes = await fetch("/.netlify/functions/store-report-data", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({
+            fileB64: labTab.fileB64,
+            fileType: labTab.fileType,
+            fileName: labTab.fileName,
+            reportType: "lab",
+            email: "",
+          })
+        });
+        const storeData = await storeRes.json();
+        blobKey = storeData.key;
+      }
+
+      updatePayGate({ preview:txt, blobKey, previewLoading:false });
     } catch(e) {
-      updatePayGate({ preview:"Your data has been analysed and we've identified several areas worth examining in detail. Unlock your full report to see everything.", previewLoading:false });
+      updatePayGate({
+        preview:"Your data has been analysed and we've identified several areas worth examining in detail. Unlock your full report to see everything.",
+        previewLoading:false
+      });
     }
   };
-
   // ── Payment gate renderer ─────────────────────────────────────────────
   const renderPaymentGate = () => {
     const isLab = payGate.tab === 0;
