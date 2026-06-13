@@ -2359,9 +2359,8 @@ const res = await fetch("/.netlify/functions/create-payment", {
                 amount: payGate.tab === 0 ? "4.90" : "9.90",
                 reportType: payGate.tab === 0 ? "lab" : "consultation",
                 description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
-                fileB64: labTab.fileB64 || null,
-fileType: labTab.fileType || null,
-fileName: labTab.fileName || null,
+                description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
+teaser: payGate.preview || "",
               })
             });
             const data = await res.json();
