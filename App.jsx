@@ -2240,7 +2240,7 @@ Return ONLY valid JSON. No markdown.`;
   // ── Payment gate renderer ─────────────────────────────────────────────
   const renderPaymentGate = () => {
     const isLab = payGate.tab === 0;
-    const price = isLab ? "€1.00" : "€9.90";
+    const price = isLab ? "€1.00" : "€1.00";
     const includes = isLab
       ? ["Every biomarker explained in full","Optimal vs reference range","Specific OTC & diet actions","7-day meal plan","Retest roadmap","PDF sent to your email"]
       : ["Urgency score 1–5","Action cards per finding","OTC guidance with allergy check","Suggested tests & doctor questions","Personalised supplement plan","PDF sent to your email"];
