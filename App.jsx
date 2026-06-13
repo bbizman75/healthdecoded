@@ -2350,21 +2350,15 @@ Return ONLY valid JSON. No markdown.`;
             }
             updatePayGate({ previewLoading: true });
             try {
-const reportJson = payGate.fullReport;
-            if (!reportJson) {
-              alert("Report not ready yet. Please wait a moment and try again.");
-              updatePayGate({ previewLoading: false });
-              return;
-            }
-            // Step 2: Create payment with report in metadata
-            const res = await fetch("/.netlify/functions/create-payment", {
-              method: "POST", headers: { "Content-Type": "application/json" },
+const res = await fetch("/.netlify/functions/create-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 email: payGate.email,
                 amount: payGate.tab === 0 ? "4.90" : "9.90",
                 reportType: payGate.tab === 0 ? "lab" : "consultation",
                 description: payGate.tab === 0 ? "HealthDecoded — Lab Results Report" : "HealthDecoded — Health Consultation Report",
-                report: reportJson,
+                blobKey: payGate.blobKey || null,
               })
             });
             const data = await res.json();
@@ -2375,7 +2369,7 @@ const reportJson = payGate.fullReport;
               updatePayGate({ previewLoading: false });
             }
           } catch(e) {
-            alert("Something went wrong generating your report. Please try again.");
+            alert("Something went wrong. Please try again.");
             updatePayGate({ previewLoading: false });
           }
           }}
