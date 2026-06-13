@@ -159,7 +159,7 @@ Generate a comprehensive health consultation report. Return ONLY this JSON (no m
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 2000,
+        max_tokens: 3500,
         messages: [{ role: "user", content: prompt }],
       }),
     });
