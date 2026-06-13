@@ -2382,7 +2382,7 @@ teaser: payGate.preview || "",
             color:"#fff", fontWeight:800, fontSize:16, cursor: payGate.previewLoading ? "not-allowed" : "pointer",
             boxShadow:"0 4px 14px rgba(22,163,74,0.3)", marginBottom:12
           }}>
-          {payGate.previewLoading ? "Setting up payment..." : `🔓 Pay ${payGate.tab === 0 ? "€1.00" : "€9.90"} and get my full report`}
+          {payGate.previewLoading ? "Setting up payment..." : `🔓 Pay ${payGate.tab === 0 ? "€1.00" : "€1.00"} and get my full report`}
         </button>
 
         {/* Payment methods */}
