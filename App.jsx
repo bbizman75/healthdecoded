@@ -2686,7 +2686,7 @@ teaser: payGate.preview || "",
             {
               icon:"🩺",
               label:lang==="FR"?"Consultation complète":"Full Health Consultation",
-              price:"€9.90",
+              price:"€1.00",
               priceColor:"#7c3aed",
               priceBg:"#f3e8ff",
               pitch:tx("tab2Pitch"),
