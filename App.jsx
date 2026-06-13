@@ -1374,7 +1374,7 @@ Return ONLY valid JSON. No markdown.`;
   const generateLabReport = async () => {
     updateLabTab({ loading:true, error:null });
     const langInstruction = lang === "FR" ? "Respond entirely in French." : "Respond entirely in English.";
-    const prompt = `You are an expert clinical lab results interpreter. ${langInstruction} Analyse the attached blood test report and return a detailed, plain-language interpretation with a 7-day meal plan.
+    const prompt = `You are an expert clinical lab results interpreter. ${langInstruction} Analyse the attached blood test report and return a detailed, plain-language interpretation.
 
 For EACH biomarker found in the report, provide a full analysis paragraph. Be specific, direct, and educational. Explain what the biomarker measures, what the patient's value means, whether it is optimal/normal/borderline/concerning, and what health implications this value has.
 
