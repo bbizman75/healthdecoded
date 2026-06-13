@@ -1513,28 +1513,6 @@ Return ONLY valid JSON. No markdown.`;
       </div>`;
     }
 
-    if (r.mealPlan) {
-      html += `<h2>🥗 7-Day Meal Plan</h2>
-      <div style="background:#dcfce7;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#166534;">
-        <strong>Goal:</strong> ${r.mealPlan.goal}
-      </div>`;
-      r.mealPlan.days?.forEach(d => {
-        html += `<div class="day-card">
-          <div class="day-header">Day ${d.day} — ${d.dayName}</div>
-          <div class="meal-grid">
-            ${[["🌅 Breakfast",d.breakfast],["☀️ Lunch",d.lunch],["🌙 Dinner",d.dinner],["🍎 Snack",d.snack]].map(([lbl,data]) => data ? `
-            <div class="meal-item">
-              <div class="meal-label">${lbl}</div>
-              <div class="meal-name">${data.meal}</div>
-              <div class="meal-why">${data.why}</div>
-            </div>` : "").join("")}
-          </div>
-        </div>`;
-      });
-      html += `<div style="background:#dcfce7;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#166534;font-weight:600;">
-        📅 Follow this plan for ${r.retestPlan?.timeframe||"6–8 weeks"}, then retest your markers. Consistent adherence compounds significantly over weeks.
-      </div>`;
-    }
 
     if (r.doctorTalkingPoints?.length > 0) {
       html += `<h2>💬 What to Discuss with Your Doctor</h2>`;
