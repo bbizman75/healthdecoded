@@ -631,6 +631,7 @@ export default function App() {
     show: false,       // is payment gate visible
     preview: null,
     fullReport: null,     // teaser text from Claude
+    blobKey: null,
     previewLoading: false,
     email: "",
     paid: false,
