@@ -2591,7 +2591,7 @@ teaser: payGate.preview || "",
   Health<span style={{ color:"#0ea5e9" }}>Decoded</span>
 </div>        
           {[
-            { icon:"🔬", label:tx("labResults"),  price:"€4.90", color:"#0369a1", bg:"#e0f2fe" },
+            { icon:"🔬", label:tx("labResults"),  price:"€1.00", color:"#0369a1", bg:"#e0f2fe" },
             { icon:"🩺", label:tx("consultation"), price:"€9.90", color:"#7c3aed", bg:"#f3e8ff" },
             { icon:"💊", label:tx("supplements"),  price:lang==="FR"?"Gratuit":"Free", color:"#16a34a", bg:"#dcfce7" },
           ].map((tab, i) => {
