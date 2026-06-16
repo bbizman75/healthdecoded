@@ -28,14 +28,6 @@ export async function handler(event) {
     console.log("Payment status:", payment.status);
     if (payment.status !== "paid") return { statusCode: 200, body: "OK" };
 
-    // ── Dedup check 2: timing-based (Mollie retries come after 15s+) ──
-    // If payment was paid more than 25 seconds ago, this is a Mollie retry
-    const paidAt = payment.paidAt ? new Date(payment.paidAt).getTime() : null;
-    const now = Date.now();
-    if (paidAt && (now - paidAt) > 25000) {
-      console.log("Payment older than 25s — likely a Mollie retry, skipping:", paymentId);
-      return { statusCode: 200, body: "OK" };
-    }
 
     // Mark as processed BEFORE doing any work
     processed.add(paymentId);
