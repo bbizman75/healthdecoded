@@ -1,3 +1,6 @@
+// In-memory dedup — works within same instance
+const processed = new Set();
+
 export async function handler(event) {
   console.log("payment-webhook triggered");
 
@@ -10,6 +13,12 @@ export async function handler(event) {
       return { statusCode: 200, body: "OK" };
     }
 
+    // ── Dedup check 1: in-memory (same instance) ──
+    if (processed.has(paymentId)) {
+      console.log("Duplicate (in-memory), skipping:", paymentId);
+      return { statusCode: 200, body: "OK" };
+    }
+
     const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
     const mollieRes = await fetch(`https://api.mollie.com/v2/payments/${paymentId}`, {
       headers: { Authorization: `Bearer ${MOLLIE_API_KEY}` },
@@ -19,13 +28,18 @@ export async function handler(event) {
     console.log("Payment status:", payment.status);
     if (payment.status !== "paid") return { statusCode: 200, body: "OK" };
 
-    // Prevent duplicate processing
-    const processedKey = `processed_${paymentId}`;
-    if (global[processedKey]) {
-      console.log("Already processed, skipping:", paymentId);
+    // ── Dedup check 2: timing-based (Mollie retries come after 15s+) ──
+    // If payment was paid more than 25 seconds ago, this is a Mollie retry
+    const paidAt = payment.paidAt ? new Date(payment.paidAt).getTime() : null;
+    const now = Date.now();
+    if (paidAt && (now - paidAt) > 25000) {
+      console.log("Payment older than 25s — likely a Mollie retry, skipping:", paymentId);
       return { statusCode: 200, body: "OK" };
     }
-    global[processedKey] = true;
+
+    // Mark as processed BEFORE doing any work
+    processed.add(paymentId);
+    console.log("Processing payment:", paymentId);
 
     const meta = payment.metadata || {};
     const email = meta.email;
