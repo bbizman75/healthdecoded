@@ -976,107 +976,29 @@ Return ONLY valid JSON. No markdown.`;
     if (step === 3) return (
       <div>
         <h2 style={{ fontSize:20, fontWeight:700, color:"#0f172a", marginBottom:6 }}>Blood Test Results</h2>
-        <p style={{ fontSize:14, color:"#64748b", marginBottom:24 }}>
-          Blood test values significantly improve the accuracy of your report — especially for detecting metabolic, thyroid, iron, and vitamin deficiencies.
+        <p style={{ fontSize:14, color:"#64748b", marginBottom:20 }}>
+          Blood tests significantly improve health analysis accuracy — but uploading them is handled separately in our Lab Results tab.
         </p>
-
-        {/* Yes/No gate */}
-        {!labInputMode && (
-          <div>
-            <div style={{ fontSize:15, fontWeight:700, color:"#0f172a", marginBottom:16, textAlign:"center" }}>
-              Do you have recent blood test results available?
-            </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-              <button onClick={() => setLabInputMode("upload")} style={{
-                padding:"20px 16px", borderRadius:14, border:"2px solid #bae6fd",
-                background:"#f0f9ff", cursor:"pointer", textAlign:"center"
-              }}>
-                <div style={{ fontSize:28, marginBottom:8 }}>✅</div>
-                <div style={{ fontWeight:700, fontSize:14, color:"#0369a1", marginBottom:4 }}>Yes — I have them</div>
-                <div style={{ fontSize:12, color:"#64748b" }}>Upload PDF or take a photo</div>
-              </button>
-              <button onClick={() => setLabInputMode("skip")} style={{
-                padding:"20px 16px", borderRadius:14, border:"2px solid #e2e8f0",
-                background:"#f8fafc", cursor:"pointer", textAlign:"center"
-              }}>
-                <div style={{ fontSize:28, marginBottom:8 }}>📅</div>
-                <div style={{ fontWeight:700, fontSize:14, color:"#374151", marginBottom:4 }}>No — not right now</div>
-                <div style={{ fontSize:12, color:"#64748b" }}>Continue without — we'll flag what to test</div>
-              </button>
-            </div>
+        <div style={{ background:"#f0f9ff", border:"1.5px solid #bae6fd", borderRadius:14, padding:"20px 22px", marginBottom:16 }}>
+          <div style={{ fontSize:22, marginBottom:10 }}>🔬</div>
+          <div style={{ fontWeight:700, fontSize:15, color:"#0369a1", marginBottom:8 }}>
+            Have blood test results?
           </div>
-        )}
-
-        {/* Upload zone */}
-        {labInputMode === "upload" && (
-          <div>
-            <label style={{
-              display:"block", border:`2px dashed ${labFileB64 ? "#16a34a" : "#bae6fd"}`,
-              borderRadius:14, padding:"36px 20px", textAlign:"center", cursor:"pointer",
-              background: labFileB64 ? "#f0fdf4" : "#f0f9ff", transition:"all 0.2s", marginBottom:14
-            }}>
-              <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" style={{ display:"none" }}
-                onChange={e => handleLabFile(e.target.files[0])} />
-              {labFileB64 ? (
-                <div>
-                  <div style={{ fontSize:36, marginBottom:8 }}>✅</div>
-                  <div style={{ fontWeight:700, fontSize:15, color:"#16a34a", marginBottom:4 }}>{labFileName}</div>
-                  <div style={{ fontSize:13, color:"#64748b", marginBottom:12 }}>
-                    File ready — Claude will extract all biomarker values automatically
-                  </div>
-                  <span onClick={e => { e.preventDefault(); setLabFile(null); setLabFileB64(""); setLabFileName(""); setLabFileType(""); }}
-                    style={{ fontSize:12, color:"#0ea5e9", textDecoration:"underline", cursor:"pointer" }}>
-                    Remove — upload a different file
-                  </span>
-                </div>
-              ) : (
-                <div>
-                  <div style={{ fontSize:44, marginBottom:10 }}>📋</div>
-                  <div style={{ fontWeight:700, fontSize:16, color:"#0369a1", marginBottom:6 }}>
-                    Drop your lab report here or click to browse
-                  </div>
-                  <div style={{ fontSize:13, color:"#64748b", marginBottom:12 }}>
-                    PDF, JPG, or PNG · Any lab worldwide · All values extracted automatically
-                  </div>
-                  <div style={{ display:"flex", flexWrap:"wrap", gap:6, justifyContent:"center" }}>
-                    {["CBC","Metabolic Panel","Lipid Profile","Thyroid","Hormones","Liver & Kidney","Vitamins","HbA1c"].map(t => (
-                      <span key={t} style={{ fontSize:11, background:"#e0f2fe", color:"#0369a1", padding:"3px 10px", borderRadius:10, fontWeight:600 }}>{t}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </label>
-            <div style={{ padding:"10px 14px", background:"#fffbeb", border:"1px solid #fde68a", borderRadius:10, fontSize:12, color:"#92400e", marginBottom:12 }}>
-              <strong>Privacy:</strong> Your file goes directly to Claude AI for analysis. It is not stored on any server.
-            </div>
-            <button onClick={() => { setLabInputMode(null); setLabFile(null); setLabFileB64(""); setLabFileName(""); setLabFileType(""); }}
-              style={{ fontSize:12, color:"#94a3b8", background:"none", border:"none", cursor:"pointer", textDecoration:"underline", padding:0 }}>
-              ← Go back
-            </button>
+          <div style={{ fontSize:13, color:"#374151", lineHeight:1.7, marginBottom:16 }}>
+            Use our <strong>Lab Results tab</strong> for a dedicated blood test analysis — every biomarker explained, optimal vs reference ranges, specific OTC actions, and a retest roadmap.
           </div>
-        )}
-
-        {/* Skip — no blood tests */}
-        {labInputMode === "skip" && (
-          <div style={{ background:"#fff7ed", border:"1.5px solid #fed7aa", borderRadius:14, padding:"20px 22px" }}>
-            <div style={{ fontSize:22, marginBottom:8 }}>📅</div>
-            <div style={{ fontWeight:700, fontSize:15, color:"#9a3412", marginBottom:8 }}>
-              No problem — we'll generate your report without blood data
-            </div>
-            <div style={{ fontSize:13, color:"#7c2d12", lineHeight:1.7, marginBottom:16 }}>
-              Your report will be based on symptoms, vitals, medications, and timeline. However, blood tests are the single most valuable input — they can reveal thyroid issues, diabetes risk, vitamin deficiencies, inflammation, and iron problems that symptoms alone cannot confirm.
-              <br/><br/>
-              <strong>We recommend getting a basic blood panel as soon as possible.</strong> In France, you can request one directly from a laboratory (no GP referral required for most panels) for around €30–50.
-            </div>
-            <div style={{ fontSize:12, color:"#9a3412", background:"#fff", padding:"10px 14px", borderRadius:8, border:"1px solid #fed7aa" }}>
-              💡 Tests worth requesting: Full blood count, glucose, HbA1c, TSH, Vitamin D, ferritin, CRP, cholesterol panel
-            </div>
-            <button onClick={() => setLabInputMode(null)}
-              style={{ fontSize:12, color:"#94a3b8", background:"none", border:"none", cursor:"pointer", textDecoration:"underline", padding:0, marginTop:14 }}>
-              ← Go back
-            </button>
+          <button onClick={() => setMainTab(0)} style={{
+            padding:"10px 20px", borderRadius:8, border:"none",
+            background:"#0369a1", color:"#fff", fontWeight:700, fontSize:13, cursor:"pointer"
+          }}>
+            🔬 Go to Lab Results →
+          </button>
+        </div>
+        <div style={{ background:"#f0fdf4", border:"1.5px solid #86efac", borderRadius:14, padding:"16px 18px" }}>
+          <div style={{ fontSize:13, color:"#166534", lineHeight:1.6 }}>
+            ✅ <strong>No blood tests?</strong> No problem — your consultation report will be based on your symptoms, vitals, medications and timeline. Click Continue to proceed.
           </div>
-        )}
+        </div>
       </div>
     );
 
